@@ -1,0 +1,44 @@
+\documentclass{article}
+\begin{document}
+As shown in Figure~\ref{fig:real}, the method performs well; Figure 3
+reports accuracy and Fig.~4 the loss; also see Figure 5 and
+Figure~\ref{fig:broken} (broken image), \autoref{fig:arch},
+\autoref{fig:noext} and \autoref{fig:alt}. We also tried
+\ref{fig:ghost}, which is undefined.
+
+\begin{figure}
+\includegraphics{figures/real.pdf}
+\caption{Real figure.}
+\label{fig:real}
+\end{figure}
+
+\begin{figure}
+\includegraphics{figures/missing.png}
+\caption{Missing file figure.}
+\label{fig:broken}
+\end{figure}
+
+\begin{figure}
+\includegraphics{figs/arch.png}
+\caption{Arch.}
+\label{fig:arch}
+\end{figure}
+
+\begin{figure}
+\includegraphics{figures/noversion}
+\caption{No ext.}
+\label{fig:noext}
+\end{figure}
+
+\begin{figure}
+\includegraphics{figures/alt.png}
+\caption{Alt ext.}
+\label{fig:alt}
+\end{figure}
+
+\begin{figure}
+\includegraphics{figures/unused_plot.pdf}
+\caption{Unreferenced.}
+\label{fig:unused}
+\end{figure}
+\end{document}

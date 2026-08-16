@@ -1,0 +1,12 @@
+{
+  "paper": "PAPER_TITLE",
+  "version": "R0",
+  "created": "YYYY-MM-DD",
+  "files": [
+    {"path": "paper/main.tex", "role": "manuscript source", "sha256": ""},
+    {"path": "paper/main.pdf", "role": "compiled manuscript", "sha256": ""},
+    {"path": "results/e1.json", "role": "experiment 1 evidence", "sha256": ""},
+    {"path": "evidence/protocol.md", "role": "experiment protocol", "sha256": ""}
+  ],
+  "notes": "Every artifact hash must be recomputed after rebuild; manifest and zips must match byte-for-byte."
+}

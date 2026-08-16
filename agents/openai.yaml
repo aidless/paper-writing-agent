@@ -1,0 +1,4 @@
+interface:
+  display_name: "论文写作 Agent"
+  short_description: "证据优先、符合 TMLR 标准的论文写作与投稿全流程"
+  default_prompt: "Use $paper-writing-agent to draft a research paper from my evidence files"

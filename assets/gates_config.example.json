@@ -1,0 +1,10 @@
+{
+  "checks": [
+    {"type": "file_exists", "name": "main.tex present", "path": "paper/main.tex"},
+    {"type": "stale_marker_absent", "name": "no old reduction values", "path": "paper/main.tex", "markers": ["29.3-30.7", "35.4", "0.218", "8.5%"]},
+    {"type": "stale_marker_absent", "name": "no fake repo links", "path": "paper/main.tex", "markers": ["github.com/Anonymous"]},
+    {"type": "json_value_equals", "name": "E4 calibrated mean", "path": "results/e4.json", "jsonpath": "calibrated.mean", "value": 0.7485},
+    {"type": "script_runs", "name": "hallucination scan (E087)", "cmd": ["python", "scripts/scan_hallucination.py", ".", "--fail-on-error"], "timeout": 120},
+    {"type": "script_runs", "name": "verification script", "cmd": ["python", "verify_table.py"], "timeout": 300}
+  ]
+}

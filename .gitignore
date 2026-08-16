@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Tool transient dirs (FM-28: never commit runner residue)
+*.tmpdir/
+.tmp*/
+.verify*/
+.compile*/
+.r*/tmp_r*/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local paper projects / evidence (never commit user papers)
+papers/
+paper_projects/

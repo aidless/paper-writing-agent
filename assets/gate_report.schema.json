@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Gate Report Contract",
+  "description": "run_acceptance_gates.py --report 输出的统一 schema(B5 收尾,C2)。含配置哈希(运行身份)与逐 check 结果,供 gate_reflection 历史与验收门审计消费。",
+  "type": "object",
+  "required": ["config", "config_sha256", "n_checks", "n_pass", "all_pass", "checks"],
+  "properties": {
+    "config": {"type": "string", "description": "gate 配置文件路径"},
+    "config_sha256": {"type": "string", "description": "配置哈希(运行身份,防漂移)"},
+    "n_checks": {"type": "integer", "minimum": 0},
+    "n_pass": {"type": "integer", "minimum": 0},
+    "all_pass": {"type": "boolean"},
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "passed"],
+        "properties": {
+          "name": {"type": "string"},
+          "passed": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

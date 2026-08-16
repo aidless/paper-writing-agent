@@ -1,0 +1,24 @@
+# 评审模型路由配置（N7/E054：judge 与被测异源，防自偏好）
+#
+# adversarial_review.workflow.md 的 8 角色模型分配从这里读取。
+# 默认与主写作模型同族（deepseek-v4-*）；要降低自偏好（E054），把至少
+# methodology/statistics 两个硬角色换成异源模型（如 claude-*/gemini-*），
+# 或在本地/网关配置可用时启用。角色模型可用 "auto"（沿用 workflow 默认）。
+#
+# 注意：此处只做路由声明；实际调用能力取决于当前 provider 是否可用。
+# 换模型后应重跑一次 judge 校准（check_judge_calibration.py）。
+
+roles:
+  methodology: deepseek-v4-pro        # 硬角色：方法/Soundness 对码（G7）
+  statistics: deepseek-v4-pro         # 硬角色：统计重算
+  experiments: deepseek-v4-flash
+  novelty: deepseek-v4-flash
+  reproducibility: deepseek-v4-flash
+  writing: deepseek-v4-flash
+  ethics: deepseek-v4-flash
+  figures: deepseek-v4-flash
+
+# 异源候选（示例）：接入后把上面对应行改成下列值并重跑校准。
+# alternatives:
+#   methodology: claude-3-7-sonnet-20250219
+#   statistics: gemini-2.5-pro-preview

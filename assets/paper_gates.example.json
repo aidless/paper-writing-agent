@@ -1,0 +1,19 @@
+{
+  "checks": [
+    {"type": "file_exists", "name": "protocol.md present (D1)", "path": "evidence/protocol.md"},
+    {"type": "file_exists", "name": "G8 form checklist present (D1)", "path": "evidence/G8_form_checklist.md"},
+    {"type": "script_runs", "name": "results dir has evidence JSON (D3 exit)", "cmd": ["python", "-c", "import sys,pathlib; sys.exit(0 if any(pathlib.Path('results').glob('*.json')) else 1)"], "cwd": ".", "timeout": 60},
+    {"type": "script_runs", "name": "claim ledger verified (no UNRECONCILED)", "cmd": ["python", "scripts/verify_claim_ledger.py", "."], "cwd": ".", "timeout": 300},
+    {"type": "script_runs", "name": "number consistency scan", "cmd": ["python", "scripts/scan_number_consistency.py", ".", "--fail-on-stale"], "cwd": ".", "timeout": 300},
+    {"type": "script_runs", "name": "statistical consistency scan", "cmd": ["python", "scripts/scan_stats_consistency.py", ".", "--fail-on-error"], "cwd": ".", "timeout": 300},
+    {"type": "script_runs", "name": "compile gate (LaTeX errors / undefined refs & cites)", "cmd": ["python", "scripts/compile_gate.py", ".", "--out", "reports/compile.md"], "cwd": ".", "timeout": 300},
+    {"type": "script_runs", "name": "writing style scan", "cmd": ["python", "scripts/check_writing_style.py", "."], "cwd": ".", "timeout": 300},
+    {"type": "script_runs", "name": "TMLR compliance scan", "cmd": ["python", "scripts/check_tmlr_compliance.py", "."], "cwd": ".", "timeout": 300},
+    {"type": "script_runs", "name": "evidence manifest verified byte-for-byte", "cmd": ["python", "scripts/build_evidence_manifest.py", ".", "--verify", "evidence_manifest.json"], "cwd": ".", "timeout": 300},
+    {"type": "file_exists", "name": "manuscript present", "path": "paper/main.tex"},
+    {"type": "script_runs", "name": "submit-ready check", "cmd": ["python", "scripts/check_submit_ready.py", "."], "cwd": ".", "timeout": 300},
+    {"type": "script_runs", "name": "judge calibration gate (O2/C1)", "cmd": ["python", "scripts/check_judge_calibration.py", "evidence/calibration/pro_judge.json", "--fail-on-uncalibrated"], "cwd": ".", "timeout": 120},
+    {"type": "stale_marker_absent", "name": "no stale round markers in summary", "path": "SELF_ASSESSMENT.md", "markers": ["UNSTABLE"]}
+  ],
+  "note": "论文级完成门示例(O4):配合 run_acceptance_gates.py 使用;'无 UNRECONCILED 声明'、'全部机器检查绿(number/stats/style/tmlr/ledger/taint/compile)'、'manifest 对账'、'终评非 UNSTABLE'、'judge 已校准' 都作为可执行 gate。与 completion_gate.py(A7)的语义一致:完成 = 门禁通过,到达预算 ≠ 成功。研究阶段门(D1 protocol/G8 checklist、D3 results 非空)由 research-cycle.md 的 D1-D3 出口标准对应;证据未产出时这些门 FAIL 是诚实的 D3→D4 阻断。路径按项目实际调整。"
+}

@@ -1,0 +1,66 @@
+name: paper-writing-agent CI
+
+# 云端 CI: 把本目录推到任意 GitHub 仓库后, 每次 push/PR 自动跑全量回归。
+# 前置: 仓库根含 scripts/run_ci.py(本地 CI 10 项检查的云端化身)。
+# 触发: push 到 main + 任意 PR。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy scipy pandas pyyaml matplotlib scikit-learn datasets torchmetrics rouge-score
+
+      - name: Compile all scripts (C1)
+        run: python -m py_compile scripts/*.py
+
+      - name: CLI --help smoke (C2)
+        run: |
+          set -e
+          for f in scripts/*.py; do
+            base=$(basename "$f")
+            case "$base" in
+              test_pyramid.py|test_evidence_protection.py) continue ;;  # integration-only
+            esac
+            python "$f" --help > /dev/null 2>&1
+          done
+
+      - name: Selftests (C3)
+        run: python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10
+
+      - name: Scanner regression (C4)
+        run: python scripts/scanner_regression.py
+
+      - name: Power analysis textbook check (C6)
+        run: python scripts/power_analysis.py --selftest
+
+      - name: Stats vs scipy cross-check (C7)
+        run: python scripts/run_ci.py --only C7
+
+      - name: Judge output validator (C8)
+        run: python scripts/run_ci.py --only C8
+
+      - name: Experiment plan dry-run (C9)
+        run: python scripts/run_ci.py --only C9
+
+      - name: Experiment suggestion mapping (C10)
+        run: python scripts/run_ci.py --only C10

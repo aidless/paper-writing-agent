@@ -183,6 +183,17 @@ def main() -> int:
         return rc == 0 and has_p0, "mapping OK (P0 suggestion produced)"
     check("C10", c10)
 
+    # C11: answer-fabrication scan (L047 — LLM fit-to-answer detection)
+    def c11():
+        rc, out = run([sys.executable,
+                       str(SCRIPTS / "scan_answer_fabrication.py"),
+                       str(SCRIPTS)])
+        if rc == 0:
+            return True, "no answer-fitting patterns in scripts"
+        tail = [l for l in out.splitlines() if "[high]" in l][:3]
+        return False, f"{len(tail)} high-risk fitting patterns: {'; '.join(tail)}"
+    check("C11", c11)
+
     print("")
     fails = [r for r in results if not r[1]]
     print(f"CI summary: {len(results) - len(fails)}/{len(results)} PASS"

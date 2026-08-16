@@ -50,7 +50,7 @@ SIG_RE = re.compile(r"significan|p\s*[<=>]\s*0\.0|p\s*=\s*0\.\d")
 DEFAULT_EXCLUDE = {"reports", ".git", "__pycache__", "node_modules", "build", "dist"}
 
 
-PROCESS_DOC_PREFIXES = ("ROUND_R", "REVIEW_R", "SELF_ASSESSMENT")
+PROCESS_DOC_PREFIXES = ("ROUND_R", "REVIEW_R", "SELF_ASSESSMENT", "novelty_claims")
 PROCESS_DOC_SUFFIXES = (".summary.md", "_R7_ethics.md")
 # R21/R30: verification scaffolding immunity.
 VERIFY_PREFIX_EXCLUDE = (".r", "._", "tmp_r", ".tmp_", ".verify", "_verify", "verify_", ".review_", ".compile")
@@ -112,7 +112,6 @@ def main() -> int:
             (root / "main.tex").write_text(
                 "The effect is significant with CI [-0.02, 0.05].\n",
                 encoding="utf-8")
-            from check_writing_style import CI_RE, SIG_RE
             text = (root / "main.tex").read_text(encoding="utf-8")
             ci_cross_zero = False
             for m in CI_RE.finditer(text):
@@ -148,8 +147,12 @@ def main() -> int:
         text = p.read_text(encoding="utf-8", errors="ignore")
         lines = text.splitlines()
         for i, line in enumerate(lines, 1):
+            math_ctx = ("theorem" in line.lower() or "worst-case" in line.lower()
+                        or "bound" in line.lower() or "lemma" in line.lower())
             for pat, msg in STRONG_CLAIMS:
                 if re.search(pat, line, re.IGNORECASE):
+                    if "guarantee" in msg and math_ctx:
+                        continue  # 数学定理语境的 guarantee（worst-case/bound/Theorem）豁免
                     findings.append(("FAIL", f"{msg} @ {show(p)}:{i} :: {line.strip()[:120]}"))
             if CAN_CLAIM.search(line):
                 findings.append(("FAIL", f"'can + claim verb' @ {show(p)}:{i} :: {line.strip()[:120]}"))

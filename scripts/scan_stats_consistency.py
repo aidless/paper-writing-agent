@@ -266,7 +266,7 @@ N_RE = re.compile(r"\b[nN]\s*=\s*([0-9]+)")
 # 带大小写捕获的变体, 仅用于同行冲突判定: 大写 N 且值 ≤ 5 视为评分/维度语义
 # (TMLR 新颖性维 N 为 1-5 分, 如 "N=2 升级为 N=4"), 不参与样本量冲突判定;
 # 小写 n 恒参与; 大写 N > 5 视为样本量(R52 实证假阳性类, 2026-08-15)。
-N_CASE_RE = re.compile(r"\b([nN])\s*=\s*([0-9]+)")
+N_CASE_RE = re.compile(r"\b([nN])\s*=\s*([0-9]+)(?!\.[0-9])")
 N_QUALIFIER_RE = re.compile(r"per group|each group|per condition|per arm|respectively|subgroup|per seed|per run|per fold|\bvs\.?\b|versus|compared with|compared to|对比", re.IGNORECASE)
 CORRECTION_RE = re.compile(
     r"\b(FDR|Benjamini[- ]Hochberg|Bonferroni|Holm|Tukey|Šidák|Sidak|false discovery|correction|corrected|adjust(?:ed|ment)?|family[- ]wise|post[- ]hoc)\b",

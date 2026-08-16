@@ -142,7 +142,8 @@ FAMILIES = {
                               "undefined_citations": 0, "multiply_labels": 0,
                               "skip_when": "compile_skipped"},
             "multiply-label": {"compile_errors": 0, "undefined_refs": 0,
-                               "undefined_citations": 0, "multiply_labels": 1},
+                               "undefined_citations": 0, "multiply_labels": 1,
+                               "skip_when": "compile_skipped"},
         },
         "sections": {
             "compile_errors": r"## Compile errors:\s*(\d+)",

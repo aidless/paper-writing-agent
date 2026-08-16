@@ -31,6 +31,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install TeX (dynamic compile layer for compile-gate)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-bibtex-extra
+          pdflatex --version | head -1
+
       - name: Compile all scripts (C1)
         run: python -m py_compile scripts/*.py
 

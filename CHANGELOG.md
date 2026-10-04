@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.0 — 2026-10-04
+
+### Fixed
+- **FM-30 落地：table-vs-prose 门量纲/格式/结构感知**。dogfood 审计 mm-epc 时该门报 5 条、人工量纲复核后 5 条全是误报——一个总是报警的门会训练使用者忽略输出。三类误报现在被判定前置分类：dimension（`×1.00` 倍数列 vs `1.0%` 百分比）、format（`{+}0.068` 对齐正号 vs 无符号同值）、structural（`Section 3.1` / `### 3.1` 章节号）。
+- **降级不等于隐藏**：所有降级配对进独立的 `Format/dimension downgrades (FM-30)` 报告段并附理由，分类过程可审计。
+
+### 反证（AGENTS.md #7）
+- 第一版 structural 规则用 40 字符窗口，把真漂移（`Table 1 ... achieves 0.7486`）一起吞了——`table-prose-dirty` 夹具当场抓到，改为行内紧邻锚定。
+- 新增夹具 `dimension-false-positive`（期望 0 mismatch / 3 downgrades）；回归 25 → 26 项全 PASS。
+- mm-epc 原现场重扫：5 条误报全部正确降级并标注理由，其中 `1.00` vs `1.0` 被准确识别为 ratio/percent 量纲错配。
+
 ## v1.1.0 — 2026-10-04
 
 ### Added

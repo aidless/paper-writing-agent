@@ -50,12 +50,18 @@ FAMILIES = {
             "cross-file": {"stale": 0, "inverted_ci": 0, "cross_file": 1, "table_prose": 0},
             "clean": {"stale": 0, "inverted_ci": 0, "cross_file": 0, "table_prose": 0},
             "table-prose-dirty": {"stale": 0, "inverted_ci": 0, "cross_file": 0, "table_prose": 1},
+            # FM-30: dimension / explicit-sign / heading-number pairs must NOT be
+            # reported as drift, but must stay visible in the downgrade section
+            # so the classification remains auditable (AGENTS.md #7).
+            "dimension-false-positive": {"stale": 0, "inverted_ci": 0, "cross_file": 0,
+                                         "table_prose": 0, "downgrades": 3},
         },
         "sections": {
             "stale": r"## Stale markers:\s*(\d+)",
             "inverted_ci": r"## Inverted confidence intervals:\s*(\d+)",
             "cross_file": r"## Values in evidence JSON but never in text:\s*(\d+)",
             "table_prose": r"## Table-vs-prose mismatches:\s*(\d+)",
+            "downgrades": r"## Format/dimension downgrades \(FM-30\):\s*(\d+)",
         },
         "args": ["--fail-on-stale"],
         "error_keys": ["stale", "table_prose"],

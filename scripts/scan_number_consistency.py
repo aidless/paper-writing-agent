@@ -224,16 +224,61 @@ def main() -> int:
     # (e.g. table 0.7485 vs prose 0.7486): the two are almost certainly the
     # same quantity written inconsistently. Threshold: |a-b| <= 1e-3 (and
     # relative <= 1e-3 of the larger). Same-literal occurrences are fine.
-    table_prose_mismatch = []  # (file, table_val, prose_literal, line)
+    #
+    # FM-30 (dogfood 2026-10-04, mm-epc: 5 flagged / 0 real): bare float
+    # comparison produced three false-positive classes. Each is now excluded
+    # from the mismatch verdict BEFORE pairing, so the gate keeps pointing at
+    # real drift instead of training the reader to ignore the report.
+    #   1. dimension  — `$\times$1.00` (ratio column) vs prose `1.0\%` (a
+    #      percentage) are different quantities; equal bare floats ≠ agreement.
+    #   2. format     — `+0.068` (sign forced by `>{+}` for column alignment)
+    #      vs unsigned `0.068` denote the same signed quantity.
+    #   3. structural — `Section 3.1`, `\subsection{3.1}`, markdown `### 3.1`
+    #      are heading numbers, not measured values.
+    # Nothing is dropped from the report: downgraded pairs are printed in the
+    # separate "Format/dimension downgrades" section with their reason, so the
+    # classification stays auditable (AGENTS.md #7: a gate must be able to fail;
+    # a gate that hides its reasoning cannot be audited).
+    DIM_TOKENS = (
+        ("ratio", re.compile(r"(?:\\times|\bx\s*)\$?\s*$")),
+        ("percent", re.compile(r"\$?\\?%|\s*\\?%$")),
+        ("money", re.compile(r"\$\$?\s*$")),
+    )
+    # A heading number is structural only when the marker sits IMMEDIATELY
+    # before the number (`Section 3.1`, `### 3.1`, `\subsection{3.1 ...}`).
+    # It must NOT reach back across a sentence: `Table 1 shows our method
+    # achieves 0.7486` puts the reference in the same line but the measured
+    # value is real drift. The first draft of the FM-30 fix used a 40-char
+    # window and swallowed exactly that case — caught by the table-prose-dirty
+    # fixture, which is why that fixture must keep asserting >=1 mismatch after
+    # every downgrade rule lands (AGENTS.md #7: the gate must be able to fail).
+    STRUCTURAL_NEAR_RE = re.compile(
+        r"(?:\\subsection|\\subsubsection|\\section|\\chapter)\*?\{[^{}]*$"
+        r"|(?:Section|Section~|Sec\.|Chapter)\s*~?\s*$"
+        r"|^#{1,6}\s+$")
+    HEADING_LINE_RE = re.compile(r"^\s*(?:#{1,6}\s+\d|\\(?:sub)*section\*?\{\s*\d)", re.MULTILINE)
+
+    def dim_of(s: str, pos: int) -> str:
+        """Classify the quantity a bare number belongs to, by its surroundings."""
+        before = s[max(0, pos - 12):pos]
+        # percent may trail the number (`1.0\%`) or lead it (`\% 1.0`)
+        after = s[pos:pos + 6]
+        for name, pat in DIM_TOKENS:
+            if pat.search(before) or pat.search(after):
+                return name
+        return "bare"
+
+    table_prose_mismatch = []  # (file, table_val, prose_literal, line, snippet)
+    downgrades = []  # (file, table_val, prose_literal, line, reason)
     for f in iter_text_files(root, exclude, exclude_names):
         text = f.read_text(encoding="utf-8", errors="ignore")
         # strip comments for .tex
         scan_text = COMMENT_RE.sub("", text) if f.suffix.lower() == ".tex" else text
         # collect table cell values (inside table/tabular or markdown table rows)
-        table_vals: set[str] = set()
+        table_vals: dict[str, str] = {}  # literal -> dimension
         for env in TABLE_ENV_RE.findall(scan_text):
             for mv in NUM_RE.finditer(env):
-                table_vals.add(mv.group(0))
+                table_vals.setdefault(mv.group(0), dim_of(env, mv.start()))
         if not table_vals:
             continue
         # prose = text outside table environments
@@ -241,17 +286,38 @@ def main() -> int:
         prose_nums = list(NUM_RE.finditer(prose))
         for tv in sorted(table_vals, key=lambda v: -len(v)):
             tv_f = float(tv)
+            tdim = table_vals[tv]
             for pm in prose_nums:
                 pv = pm.group(0)
                 if pv == tv:
                     continue
                 pv_f = float(pv)
-                if abs(tv_f - pv_f) <= 1e-3 and abs(tv_f - pv_f) <= 1e-3 * max(abs(tv_f), abs(pv_f), 1.0):
-                    ln = prose[: pm.start()].count("\n") + 1
-                    start = max(0, pm.start() - 15)
-                    end = min(len(prose), pm.end() + 15)
-                    table_prose_mismatch.append((str(f), tv, pv, ln, prose[start:end].replace("\n", " ").strip()))
-                    break  # one flag per (file, value)
+                if not (abs(tv_f - pv_f) <= 1e-3 and abs(tv_f - pv_f) <= 1e-3 * max(abs(tv_f), abs(pv_f), 1.0)):
+                    continue
+                ln = prose[: pm.start()].count("\n") + 1
+                start = max(0, pm.start() - 15)
+                end = min(len(prose), pm.end() + 15)
+                snip = prose[start:end].replace("\n", " ").strip()
+                # ---- FM-30 downgrades (verdict suppressed, still reported) ----
+                # structural: the marker must be immediately before the number
+                line_start = prose.rfind("\n", 0, pm.start()) + 1
+                line_prefix = prose[line_start:pm.start()]
+                if (STRUCTURAL_NEAR_RE.search(line_prefix)
+                        or HEADING_LINE_RE.match(prose[line_start:pm.end() + 4])):
+                    downgrades.append((str(f), tv, pv, ln, "structural: heading/cross-reference number"))
+                    break
+                pdim = dim_of(prose, pm.start())
+                if pdim != "bare" and tdim != "bare" and pdim != tdim:
+                    downgrades.append((str(f), tv, pv, ln, f"dimension: table={tdim} prose={pdim}"))
+                    break
+                if tdim != "bare" and pdim == "bare":
+                    downgrades.append((str(f), tv, pv, ln, f"dimension: table={tdim} prose=bare"))
+                    break
+                if abs(tv_f - pv_f) == 0.0:
+                    downgrades.append((str(f), tv, pv, ln, "format: equal value, different rendering"))
+                    break
+                table_prose_mismatch.append((str(f), tv, pv, ln, snip))
+                break  # one flag per (file, value)
 
     lines = []
     lines.append("# Number-consistency scan report")
@@ -280,6 +346,11 @@ def main() -> int:
     lines.append(f"\n## Table-vs-prose mismatches: {len(table_prose_mismatch)}")
     for f, tv, pv, ln, snip in table_prose_mismatch:
         lines.append(f"- table `{tv}` vs prose `{pv}` @ {show(Path(f))}:{ln}  :: {snip}")
+    lines.append(f"\n## Format/dimension downgrades (FM-30): {len(downgrades)}")
+    lines.append("# These pairs are numerically close but NOT drift: wrong dimension, "
+                 "explicit sign for column alignment, or a heading number. Listed for audit.")
+    for f, tv, pv, ln, why in downgrades:
+        lines.append(f"- `{why}` | table `{tv}` vs prose `{pv}` @ {show(Path(f))}:{ln}")
 
     report = "\n".join(lines)
     if args.out:

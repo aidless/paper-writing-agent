@@ -194,6 +194,24 @@ def main() -> int:
         return False, f"{len(tail)} high-risk fitting patterns: {'; '.join(tail)}"
     check("C11", c11)
 
+    # C12: failure-mode index sync (CN/EN). A discipline document that exists in
+    # one language only teaches the lesson in one language only — regression
+    # from dogfood 2, where the EN library silently missed the whole redaction
+    # pass. The generator also asserts both copies carry the same entries.
+    def c12():
+        rc, out = run([sys.executable, str(SCRIPTS / "fm_index.py"), "--check"])
+        tail = [l for l in out.strip().splitlines() if l.startswith(("OK", "FAIL"))]
+        return rc == 0, tail[-1] if tail else out.strip()[-120:]
+    check("C12", c12)
+
+    # C13: SCRIPTS.md sync. The index is generated from script docstrings, so a
+    # stale copy hides newly added gates from anyone reading the repo.
+    def c13():
+        rc, out = run([sys.executable, str(SCRIPTS / "gen_scripts_index.py"), "--check"])
+        tail = [l for l in out.strip().splitlines() if l.startswith(("OK", "FAIL"))]
+        return rc == 0, tail[-1] if tail else out.strip()[-120:]
+    check("C13", c13)
+
     print("")
     fails = [r for r in results if not r[1]]
     print(f"CI summary: {len(results) - len(fails)}/{len(results)} PASS"

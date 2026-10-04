@@ -257,6 +257,14 @@ def main() -> int:
         r"|(?:Section|Section~|Sec\.|Chapter)\s*~?\s*$"
         r"|^#{1,6}\s+$")
     HEADING_LINE_RE = re.compile(r"^\s*(?:#{1,6}\s+\d|\\(?:sub)*section\*?\{\s*\d)", re.MULTILINE)
+    # Dogfood 2 (AGI-KIT): a number quoted as the subject of a planned or
+    # hypothetical test is not a measurement. The cue is a forward-looking
+    # marker in the same paragraph, not a fixed window: "Two follow-ups remain:
+    # ... feed the gate near-tied candidates that differ only in low-order bits
+    # (0.8499999 vs 0.8500001)" must not reconcile against a table cell.
+    HYPOTHETICAL_RE = re.compile(
+        r"\b(?:future|follow-?ups?|planned|will\b|would\b|to be|hypothetical|"
+        r"prospective|future work|limitation)\b", re.IGNORECASE)
 
     def dim_of(s: str, pos: int) -> str:
         """Classify the quantity a bare number belongs to, by its surroundings."""
@@ -299,6 +307,16 @@ def main() -> int:
                 end = min(len(prose), pm.end() + 15)
                 snip = prose[start:end].replace("\n", " ").strip()
                 # ---- FM-30 downgrades (verdict suppressed, still reported) ----
+                # hypothetical: the number is an EXAMPLE of a value under
+                # discussion, not a measurement being reconciled. Dogfood 2
+                # (AGI-KIT, 2026-10-04): a Limitations paragraph writes
+                # "(0.8499999 vs 0.8500001)" as the near-tied pair a FUTURE
+                # stress test will feed in; pairing that against a table
+                # entry of 0.85 flagged a phantom mismatch.
+                if HYPOTHETICAL_RE.search(prose[max(0, pm.start() - 400):pm.end() + 120]):
+                    downgrades.append((str(f), tv, pv, ln,
+                                       "hypothetical: value quoted as a future/planned example"))
+                    break
                 # structural: the marker must be immediately before the number
                 line_start = prose.rfind("\n", 0, pm.start()) + 1
                 line_prefix = prose[line_start:pm.start()]

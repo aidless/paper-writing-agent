@@ -55,6 +55,8 @@ FAMILIES = {
             # so the classification remains auditable (AGENTS.md #7).
             "dimension-false-positive": {"stale": 0, "inverted_ci": 0, "cross_file": 0,
                                          "table_prose": 0, "downgrades": 3},
+            "hypothetical-false-positive": {"stale": 0, "inverted_ci": 0, "cross_file": 0,
+                                            "table_prose": 0, "downgrades": 2},
         },
         "sections": {
             "stale": r"## Stale markers:\s*(\d+)",

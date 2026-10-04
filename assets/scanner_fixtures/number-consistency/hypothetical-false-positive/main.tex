@@ -1,0 +1,19 @@
+\section{Limitations of the Stress Test}
+Two follow-ups remain. A future stress test will feed the gate near-tied
+candidates that differ only in low-order bits (0.8499999 vs 0.8500001) to
+confirm deterministic behavior. A planned follow-up will probe thresholds of
+0.7500 and 0.7502 against the same candidate.
+
+\begin{table}
+\begin{tabular}{lcc}
+\toprule
+Setting & Threshold & Acc \\
+\midrule
+Default & 0.85 & 0.7485 \\
+Swept & 0.7500 & 0.7485 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The measured accuracy at the default threshold is 0.7485 and is unchanged
+across the sweep.

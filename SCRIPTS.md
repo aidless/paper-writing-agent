@@ -16,7 +16,7 @@
 | `compile_gate.py` | compile_gate.py — LaTeX 编译门(gap-review R2 新增): 编译 + 引用键核对。 |
 | `consensus_check.py` | consensus_check.py - evidence synthesis adjudicator (Consensus-style). |
 | `draft_rebuttal.py` | paper-writing-agent: rebuttal draft generator (N5). |
-| `fm_index.py` | FM index generator: parse references/failure-modes.md headings into the INDEX section. |
+| `fm_index.py` | FM index generator: parse references/failure-modes{,_EN}.md into their INDEX sections. |
 | `gate_citations.py` | gate_citations.py — Phase 5 引用验证门禁 (L2-2) |
 | `gate_reflection.py` | gate_reflection.py — Reflexion 式反思注入(科研论文 agent Phase 4 改造)。 |
 | `gen_review_cards.py` | gen_review_cards.py - generate deepseek-eyes review cards for all PDF pages |

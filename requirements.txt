@@ -2,7 +2,7 @@
 # numpy/scipy/matplotlib 的 API 破坏性变更由 scanner_regression 兜底。
 numpy>=2.0
 scipy>=1.14
-pandas>=2.0
+pandas>=3.0.6
 pyyaml>=6.0
 matplotlib>=3.9
 scikit-learn>=1.3

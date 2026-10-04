@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.1.0 — 2026-10-04
+
+### Added
+- **AAAI venue mapping**（references/venue-mapping.md §3b）：G 级映射 + 维度差异表 + 适配流程——mm-epc（AAAI 2027）投稿线的直接输入；SKILL.md Phase 5 分流同步更新（AAAI 匿名=内容检查非选项检查、生成式 AI 披露必查、双截止节奏）。
+- **FM 增长机制**：failure-modes.md 新增入库协议（编号不复用/四字段格式/来源必须为实际修改轮次/脱敏规则）+ `scripts/fm_index.py`（INDEX 自动生成 + `--check` CI 校验）+ `make fm-index`；FM 库 29 → 30 条（FM-30）。
+- **SCRIPTS.md 生成器固化**：`scripts/gen_scripts_index.py`（剥文件名前缀、`--check` 模式）+ `make scripts-index`——v1.0.0 的内联生成正式工具化。
+- **首次 dogfood**（dogfood/2026-10-04-mm-epc-scan.md）：scan/gate_citations 对布局无关的真实投稿仓开箱即用；产出 FM-30（扫描器误报模式：章节号/格式差异判 mismatch）与 mm-epc 侧 4 项卫生发现（三副本两态/精度不一/正负号呈现/空残留）。
+
+### Unchanged
+- 49 门扫描逻辑零改动（本版全部是文档/索引/映射层——护住 25/25 回归与 CI 绿）。
+
 ## v1.0.0 — 2026-10-04
 
 首个开源发布。

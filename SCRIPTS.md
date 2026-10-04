@@ -16,9 +16,11 @@
 | `compile_gate.py` | compile_gate.py — LaTeX 编译门(gap-review R2 新增): 编译 + 引用键核对。 |
 | `consensus_check.py` | consensus_check.py - evidence synthesis adjudicator (Consensus-style). |
 | `draft_rebuttal.py` | paper-writing-agent: rebuttal draft generator (N5). |
+| `fm_index.py` | FM index generator: parse references/failure-modes.md headings into the INDEX section. |
 | `gate_citations.py` | gate_citations.py — Phase 5 引用验证门禁 (L2-2) |
 | `gate_reflection.py` | gate_reflection.py — Reflexion 式反思注入(科研论文 agent Phase 4 改造)。 |
 | `gen_review_cards.py` | gen_review_cards.py - generate deepseek-eyes review cards for all PDF pages |
+| `gen_scripts_index.py` | SCRIPTS.md generator: rebuild the script index from docstring first lines. |
 | `independent_recompute.py` | independent_recompute.py - 独立重算入口（评估第 4 步）。 |
 | `init_paper.py` | paper-writing-agent: one-command paper directory initializer. |
 | `literature_discovery.py` | literature_discovery.py - arXiv semantic discovery (Elicit-style). |
@@ -31,13 +33,13 @@
 | `rebuttal_sim.py` | rebuttal_sim.py — rebuttal 模拟门禁(τ-bench 两阶段,E060 落地,I3)。 |
 | `refine_verify.py` | refine_verify.py - Phase 2: verify best train-time configs with multiple seeds. |
 | `release.py` | release.py - 单一发布入口（审查要求：发布门不可被跳过）。 |
-| `retrieve_experience.py` | retrieve_experience.py — 论文 agent 三因子经验检索(recency × importance × relevance) + α  |
+| `retrieve_experience.py` | retrieve_experience.py — 论文 agent 三因子经验检索(recency × importance × relevance) + α 任务类型加权 |
 | `run_acceptance_gates.py` | paper-writing-agent: reusable acceptance-gate runner. |
 | `run_ci.py` | paper-writing-agent: local CI runner (D3). |
 | `run_experiment_plan.py` | paper-writing-agent: experiment-plan orchestrator (N2). |
 | `scan_answer_fabrication.py` | scan_answer_fabrication.py — 答案拟合扫描器 (L047 工具化, 论文 agent 管线集成). |
-| `scan_figure_claims.py` |  |
-| `scan_hallucination.py` |  |
+| `scan_figure_claims.py` | paper-writing-agent: figure-claim consistency scanner (audit L2-4, 图-文双向校验). |
+| `scan_hallucination.py` | paper-writing-agent: hallucination scanner (MLR-Bench HALLUCINATION_RUBRIC, 4 types). |
 | `scan_number_consistency.py` | paper-writing-agent: number-consistency scanner. |
 | `scan_stats_consistency.py` | paper-writing-agent: statistical-consistency scanner. |
 | `scanner_regression.py` | scanner_regression.py — 失败类反例回归(Voyager 自动课程式落地)。 |
@@ -51,5 +53,5 @@
 | `validate_judge_output.py` | paper-writing-agent: judge-output schema validator + tolerant parser (G6). |
 | `verify_claim_ledger.py` | paper-writing-agent: claim-ledger verifier. |
 | `verify_labels.py` | verify_labels.py — 标签判定器验证门(G006, pilot-derived)。 |
-| `verify_taint.py` |  |
+| `verify_taint.py` | paper-writing-agent: evidence-taint propagation verifier (L2-5). |
 | `verify_tree_diff.py` | verify_tree_diff.py - 受保护树差分（评估不变量 1+3）。 |

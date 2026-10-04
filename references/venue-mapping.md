@@ -42,6 +42,46 @@
 | author 块（camera-ready 反匿名化） | 提交版删除；camera-ready 用 `[accepted]` 恢复 | camera-ready 恢复作者块（去掉 `[review]`） | camera-ready 恢复作者块；预印本用 `[preprint]` 选项 | camera-ready 用 `[accepted]` 恢复作者块 | camera-ready 恢复作者块；预印本用 `[preprint]` 选项 |
 | 伦理声明 / 更广泛影响 | G7：Broader Impact 节（如适用，低风险可显式豁免） | 无强制 broader impact 节；存在 **ethics review 流程**（敏感论文被转伦理审查，以当年为准） | **Ethics Checklist 强制**（随稿提交）；Broader Impact 建议但近年非强制（以当年 CFP 为准） | 伦理影响讨论逐年表述不同（CFP 要求/建议视年份）；以当年 CFP 为准 | ACL Code of Ethics；建议 Ethical Considerations 节；涉人数据需 IRB/知情同意（以当年指南为准） |
 
+## 3b. AAAI 专节（L3-2 增补，2026-10 快照）
+
+> 动机：mm-epc 线的投稿目标即 AAAI；本节为 AAAI 做与 §3 等价的维度映射。
+> ⚠ §7 快照警示同样适用：AAAI 各年度 CFP 差异显著（页数、双截止、AI 披露条款），投稿前以当年 aaai.org 官网为准。
+
+### 3b.1 维度差异（TMLR 基线 → AAAI）
+
+| 维度 | TMLR（基线） | AAAI（快照，以当年 CFP 为准） |
+|---|---|---|
+| 模板 | `\usepackage{tmlr}` 无选项=匿名 | `aaai.sty`（双栏 letterpaper）；**风格文件来自 AAAI Author Kit 官网，许可为 AAAI 自定义条款——禁止入仓再分发**，作者各自下载 |
+| 匿名化 | 双盲 | 双盲；作者块留空/Anonymous、致谢与资助删除、自身引用匿名化（同 NeurIPS 惯例） |
+| 页数 | 无硬上限（惯例 10-20） | 近年主文 **正文 7 页 + 第 8 页仅参考文献**（7+1/7+2 历年波动）；camera-ready 可 +1 页（以当年 CFP 为准） |
+| 补充材料 | ≤100MB、匿名、PDF/ZIP | ZIP/PDF 匿名；体积上限以当年 CFP 为准（勿写死） |
+| 引用格式 | `tmlr.bst` | `aaai.bst`（Author Kit 随附；G6 的替换目标） |
+| 伦理 / AI 披露 | G7 Broader Impact（如适用可豁免） | 无强制 ethics checklist；**近年 CFP 引入生成式 AI 使用披露条款**——LLM 辅助写作的稿件必须核对该年要求（存在与否、披露位置与措辞） |
+| 截止节奏 | 随时可投 | **摘要注册 deadline 早于全文约 1-2 周**，双截止均硬；另有独立 Student Abstract 赛道（篇幅更短、单独评审） |
+| Rebuttal | 公开评审 + 作者讨论 | author feedback 窗口较短（通常数天、仅限回答评审问题，以当年为准） |
+| 投稿系统 | OpenReview | 以当年为准（历史 CMT/OpenReview 均有）；字段需当年核对 |
+
+### 3b.2 G 级映射（check_tmlr_compliance.py → AAAI）
+
+| 门 | AAAI | 说明 |
+|---|---|---|
+| G1 模板 | 🔧 换检查语义 | 匹配目标 `aaai.sty`；**AAAI 匿名不由包选项驱动**（无 TMLR 的无选项/[preprint] 体系），应改为「作者块为空/Anonymous + 无真名」的内容检查——与 TMLR 语义不同，勿直接套选项正则 |
+| G2 页面 | ✅ 复用 | letterpaper；7+1 页数人工核对 |
+| G3 匿名化 | ✅ 复用 | 双盲通用；identity/email/name 扫描零改动 |
+| G4 匿名仓库 | 🔧 换白名单 | AAAI 双盲下匿名仓库策略以当年为准 |
+| G5 补充材料 | 🔧 参数化 | 逻辑复用；上限按当年 |
+| G6 引用 | 🔧 换 bst | `aaai.bst` |
+| G7 伦理 | ❌ 语义替换 | AAAI 无 Broader Impact 节语义；替换为「生成式 AI 使用披露 + 可选 Ethics Statement」核对 |
+| G8 表单 | 🔧 重做清单 | 双截止 + Student Abstract 字段，按当年系统 |
+| G9-G11、EXTRA | ✅ 复用 | venue 无关 |
+
+### 3b.3 AAAI 适配最小流程（§5 之上的增量）
+
+1. §5 第 1 步同款参数化；G1 按 3b.2 改为内容检查而非选项检查。
+2. Author Kit 不入 `templates/`（许可限制）；本表只记录官方入口，投稿时人工置入。
+3. mm-epc 现货：仓内已有 `aaai_student_abstract/`（Student Abstract 赛道产物），复用本表核对页数与匿名。
+
+
 ## 4. G 级可复用性矩阵（check_tmlr_compliance.py 的检查 × venue）
 
 | 门 | CVPR | NeurIPS | ICML | ACL | 说明 |
@@ -75,6 +115,7 @@
 - **CVPR**：2025 Author Guidelines <https://cvpr.thecvf.com/Conferences/2025/AuthorGuidelines> ｜ Call for Papers <https://cvpr.thecvf.com/Conferences/2025/CallForPapers> ｜ 模板 author-kit（cvpr-org/author-kit）
 - **NeurIPS**：Call for Papers 2025 <https://neurips.cc/Conferences/2025/CallForPapers> ｜ 风格文件页面（NeurIPS 官网 PaperInformation/StyleFiles，随年份更新）
 - **ICML**：ICML 2025 Call for Papers <https://icml.cc/Conferences/2025/CallForPapers> ｜ Author Instructions（camera-ready）<https://icml.cc/Conferences/2025/AuthorInstructions>
+- **AAAI**：当年 CFP（如 AAAI-26 <https://aaai.org/conference/aaai/>，URL 随年份变）｜ Author Kit 下载页（aaai.org → Authors，许可禁止再分发）｜ 生成式 AI 披露条款以当年 CFP 正文为准
 - **ACL**：ACL Rolling Review CFP <http://aclrollingreview.org/cfp> ｜ ACL 官方 portal <https://www.aclweb.org/portal/content/acl-rolling-review> ｜ 当年主会页面（如 <https://2025.aclweb.org>）与 ACL Style Files（acl-org/ACLPUB 风格包）
 
 ## 7. 遗留风险

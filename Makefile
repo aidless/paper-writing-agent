@@ -14,3 +14,11 @@ ci:
 
 clean:
 	rm -rf scripts/llm_calls.jsonl scripts/results/ .tmp*/ .verify*/ *.tmpdir/ 2>/dev/null || true
+
+.PHONY: fm-index
+fm-index:  ## regenerate the FM index (references/failure-modes.md INDEX section)
+	python3 scripts/fm_index.py --write && python3 scripts/fm_index.py --check
+
+.PHONY: scripts-index
+scripts-index:  ## regenerate SCRIPTS.md from script docstrings
+	python3 scripts/gen_scripts_index.py

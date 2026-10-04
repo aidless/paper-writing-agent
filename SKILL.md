@@ -378,7 +378,7 @@ python scripts/gate_citations.py <paper_dir> --fail-on-suspicious --out reports/
    (4-layer verification, 90-day cache, needs network) via subprocess; report carries
    the fixed `paper` target label, relative bib path, and six `## <段落>: <计数>` lines
    (Verified/Not_found/Mismatch/Manual_needed/Skipped_network/No_bib_found).
-3. 目标 venue ≠ TMLR（CVPR/NeurIPS/ICML/ACL）时：TMLR 脚本结果不作数，按 [references/venue-mapping.md](references/venue-mapping.md) 人工映射——复用通用 G（G3 匿名/G9 重叠/G10 双盲/G11 门与哈希、占位符/±/zip 大小），替换 venue 专属项（G1 模板包名/G2 页面/G4 匿名白名单/G5 阈值/G6 bst/G7 伦理语义/G8 表单），并核对当年官网（链接见 venue-mapping.md §6；页数/补充材料/匿名化表述逐年变化，映射表是快照）。
+3. 目标 venue ≠ TMLR（CVPR/NeurIPS/ICML/ACL/**AAAI**）时：TMLR 脚本结果不作数，按 [references/venue-mapping.md](references/venue-mapping.md) 人工映射——复用通用 G（G3 匿名/G9 重叠/G10 双盲/G11 门与哈希、占位符/±/zip 大小），替换 venue 专属项（G1 模板包名/G2 页面/G4 匿名白名单/G5 阈值/G6 bst/G7 伦理语义/G8 表单），并核对当年官网（链接见 venue-mapping.md §6；页数/补充材料/匿名化表述逐年变化，映射表是快照）。**AAAI 特别注意**（venue-mapping.md §3b）：匿名不由包选项驱动（无 [preprint] 选项体系），G1 改为作者块内容检查；近年 CFP 含生成式 AI 使用披露条款，LLM 辅助稿件必查；摘要注册 deadline 早于全文 1-2 周。
 4. Rebuild submission zips, re-hash every artifact, and verify the manifest byte-for-byte:
 
 ```

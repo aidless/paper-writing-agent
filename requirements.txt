@@ -1,9 +1,11 @@
-numpy
-scipy
-pandas
-pyyaml
-matplotlib
-scikit-learn
-datasets
-torchmetrics
-rouge-score
+# 下限 = 已知可用版本；上界不锁（CI 持续在 py3.11/3.12 验证最新版）。
+# numpy/scipy/matplotlib 的 API 破坏性变更由 scanner_regression 兜底。
+numpy>=2.0
+scipy>=1.14
+pandas>=2.0
+pyyaml>=6.0
+matplotlib>=3.9
+scikit-learn>=1.3
+datasets>=2.19
+torchmetrics>=1.3
+rouge-score>=0.1.2

@@ -19,3 +19,7 @@ Thumbs.db
 # Local paper projects / evidence (never commit user papers)
 papers/
 paper_projects/
+
+# LLM call logs / runner results (never commit)
+scripts/llm_calls.jsonl
+scripts/results/

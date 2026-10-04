@@ -106,7 +106,7 @@ metric scoring vs SOTA, no LLM judge):
   deepseek-v4-flash, no retries/multi-candidate)
 - All scores independently recomputable (submission.csv + evaluate.py,
   SHA-256 manifest); failures honestly classified (env-dependency vs agent)
-- Tools: `F:\deepseek\research-kit\airs-eval\` (6 scripts)
+- Tools: external `airs-eval` toolkit (6 scripts; path configurable, not bundled)
 
 ## Documentation languages
 

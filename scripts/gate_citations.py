@@ -55,7 +55,13 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-DEFAULT_VERIFIER = Path(r"F:\deepseek\research-kit\citation-verifier\verify_citations.py")
+_ENV_VERIFIER = os.environ.get("CITATION_VERIFIER_PATH")
+_WIN_LEGACY = Path(r"F:\deepseek\research-kit\citation-verifier\verify_citations.py")
+DEFAULT_VERIFIER = (
+    Path(_ENV_VERIFIER) if _ENV_VERIFIER
+    else _WIN_LEGACY if _WIN_LEGACY.exists()
+    else Path("tools/citation-verifier/verify_citations.py")
+)
 PROBE_HOSTS = [
     "https://api.crossref.org",
     "https://api.semanticscholar.org",

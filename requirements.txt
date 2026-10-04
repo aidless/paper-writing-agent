@@ -1,6 +1,6 @@
 # 下限 = 已知可用版本；上界不锁（CI 持续在 py3.11/3.12 验证最新版）。
 # numpy/scipy/matplotlib 的 API 破坏性变更由 scanner_regression 兜底。
-numpy>=2.0
+numpy>=2.5.3
 scipy>=1.14
 pandas>=2.0
 pyyaml>=6.0

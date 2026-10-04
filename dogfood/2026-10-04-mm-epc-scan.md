@@ -21,10 +21,12 @@ python3 scripts/gate_citations.py /path/to/mm-epc/paper --bib references.bib
 ### B. mm-epc 侧（移交该仓 owner）
 | 发现 | 位置 | 定性 |
 |---|---|---|
-| 统计表三副本两态 | `paper/statistical_table.tex` == `experiments/statistical_table.tex` ≠ `experiments/statistical_table_new.tex` | `_new` 是早期草稿（含 TBD 占位、仅 3 行数据、Qwen-plus 全 TBD）；数值与主稿不冲突（DashScope 行 0.273/0.341/0.068 一致），但会污染检索——建议删除或挪 archive/ |
-| 百分比精度不统一 | `mm_epc_paper.tex:254` 正文 `1.0%` vs 表格 `1.00%` | 同值不同格式；投稿前统一小数位 |
-| Δ 正负号呈现不一 | `statistical_table.tex:6` 表格 `{+}0.068` vs 正文 `0.068` | 同上，格式口径问题 |
-| 空残留文件 | `新建 文本文档.txt`（0 字节，仓根） | 工作残留，删 |
+| 统计表三副本两态 | `paper/statistical_table.tex` == `experiments/statistical_table.tex` ≠ `experiments/statistical_table_new.tex` | `_new` 是早期草稿（含 TBD 占位、仅 3 行数据、Qwen-plus 全 TBD）；数值与主稿不冲突（DashScope 行 0.273/0.341/0.068 一致），但会污染检索——**已删除（git 历史可恢复）** |
+| ~~百分比精度不统一~~ | 初判 `mm_epc_paper.tex:254` 正文 `1.0%` vs 表格 `1.00%` | **复核撤案**：表格 `1.00` 是 PCI 倍数列（`\times$1.00/\times$1.55`，L281-282），与正文 `1.0%` 百分比是不同量纲——扫描器跨量纲误配对，非精度漂移 |
+| ~~Δ 正负号呈现不一~~ | `statistical_table.tex:6` 表格 `{+}0.068` vs 正文 `0.068` | **复核撤案**：Δγ 列内全部带显式符号是排版对齐惯例（$-$0.208/$-$0.088/+0.068），正文作为带符号数学量写 `\Delta\gamma=0.068` 正确——两者可并存 |
+| 空残留文件 | `新建 文本文档.txt`（0 字节，仓根） | 工作残留，**已删除** |
+
+> 复核结论（2026-10-04 二次核对）：5 个 mismatch **全部为扫描器误报/可并存惯例**，mm-epc 稿件数字无漂移。这一轮复核本身成为 FM-30 的核心案例：mismatch 报告必须人工分类，"2 真实格式项"的初判在量纲核对后清零。
 
 ### C. 门覆盖边界（验证 venue-mapping 的意义）
 `check_tmlr_compliance.py` 对 mm-epc（AAAI 稿）**不适用**——G1 模板正则、G6 bst、G7 Broader Impact 语义全是 TMLR 专属；这正是 venue-mapping.md §3b（AAAI 专节）存在的理由。mm-epc 投稿前人工核对项：作者块内容检查（AAAI 匿名非选项驱动）、生成式 AI 使用披露（以当年 CFP 为准）、7+1 页数。
@@ -32,4 +34,4 @@ python3 scripts/gate_citations.py /path/to/mm-epc/paper --bib references.bib
 ## 结论
 - 包外可用性：**scan/gate_citations 开箱即用**（布局无关）；合规门 venue 绑定明确（文档已把边界写死）。
 - 回灌：FM-30 入库 + 索引机制上线（本次 dogfood 的直接产出）。
-- 待办（可选）：scan_number_consistency 加 format-only 分类（FM-30 修复字段）。
+- 待办（可选）：scan_number_consistency 加两类降噪——format-only 分类（±/精度）与量纲感知配对（×倍数列 vs % 百分比）——本轮 5/5 误报全部源于此二类。

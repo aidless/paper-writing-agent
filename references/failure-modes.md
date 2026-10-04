@@ -326,7 +326,7 @@
   预算约束必须披露而不是隐藏（诚实降级 > 伪造完整）。
 
 ## FM-30 扫描器把章节号/格式差异当作数值 mismatch（dogfood mm-epc 发现）
-- 症状：scan_number_consistency 的 Table-vs-prose 段把 `### 3.1 Setup`（章节号）、`{+}0.068` vs `0.068`（正负号呈现）、`1.00%` vs `1.0%`（精度格式）判为 mismatch——3/5 命中为误报，淹没真漂移。
-- 检测：mismatch 行上下文若为 `### \d+\.\d+` 标题模式、或两侧数值解析相等（仅符号/小数位差异），归为 format-only；dogfood 记录 2026-10-04（mm-epc/paper：5 mismatch 中 2 真实格式项、3 误报）。
+- 症状：scan_number_consistency 的 Table-vs-prose 段把 `### 3.1 Setup`（章节号）、`{+}0.068` vs `0.068`（正负号呈现）、`1.00` vs `1.0%`（**跨量纲误配对**：PCI 倍数列 ×1.00 vs 百分比 1.0%）判为 mismatch——dogfood mm-epc 5/5 命中全为误报，稿件实无漂移。
+- 检测：mismatch 行上下文若为 `### \d+\.\d+` 标题模式、或两侧数值解析相等（仅符号/小数位差异），归为 format-only；两侧带不同量纲记号（`\times$` vs `%`）则整对作废；复核记录 2026-10-04（mm-epc/paper：初判 2 真实 + 3 误报，二次量纲核对后 5/5 全误报——**初判也会错，mismatch 必须逐对看量纲**）。
 - 修复：读报告先分类 numeric-real vs format-only（数值真漂移才改稿）；格式类统一口径（百分比小数位、Δ 正负号）；长期修复=扫描器加 format-only 分类（equal(parse) 时降级为 INFO）。
 - 元教训：**扫描器的误报率决定它的可信度**——把格式差异报成 mismatch，会让使用者学会忽略整段报告；分类比全报更有价值。

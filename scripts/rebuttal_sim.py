@@ -42,7 +42,7 @@ def _stable_seed(*parts) -> int:
 _MOCK_NOISE = float(os.environ.get("REBUTTAL_MOCK_NOISE", "0"))
 
 # 共享 LLM 底座(与 live_reviewer.py 同一路径); 缺失时 --live 报错而非静默
-_RK_LLM = Path(r"F:\deepseek\research-kit\llm-client")
+_RK_LLM = Path(os.environ.get("PWA_RESEARCH_KIT", Path.home() / "research-kit") / "llm-client")
 
 REVIEWER_TYPES = ["evidence-doubt", "overclaim", "mechanism"]
 

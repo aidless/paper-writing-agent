@@ -56,7 +56,7 @@ import urllib.request
 from pathlib import Path
 
 _ENV_VERIFIER = os.environ.get("CITATION_VERIFIER_PATH")
-_WIN_LEGACY = Path(r"F:\deepseek\research-kit\citation-verifier\verify_citations.py")
+_WIN_LEGACY = Path(os.environ.get("PWA_RESEARCH_KIT", Path.home() / "research-kit")) / "citation-verifier" / "verify_citations.py"
 DEFAULT_VERIFIER = (
     Path(_ENV_VERIFIER) if _ENV_VERIFIER
     else _WIN_LEGACY if _WIN_LEGACY.exists()

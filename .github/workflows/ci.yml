@@ -52,7 +52,12 @@ jobs:
           done
 
       - name: Selftests (C3)
-        run: python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10
+        # C11/C12/C13 were verified green locally and left out of this list. All
+        # three are cheap and they are the ones that catch drift: C11 greps the
+        # scripts for answer-fitting patterns, C12 asserts INDEX.md and the CN/EN
+        # entry lists stay in sync at 31 each, C13 asserts SCRIPTS.md still matches
+        # what is on disk. None of them can fail the build while they are absent.
+        run: python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10,C11,C12,C13
 
       - name: Scanner regression (C4)
         run: python scripts/scanner_regression.py

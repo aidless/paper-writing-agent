@@ -16,6 +16,7 @@ import subprocess
 import sys
 import time
 import uuid
+import os
 from pathlib import Path
 
 import numpy as np
@@ -52,7 +53,7 @@ def main() -> int:
     # 2. data hash (CIFAR-10 batches — data version)
     import hashlib as _h
     data_hashes = {}
-    data_dir = Path(r"F:\deepseek\.datasets\cifar-10-batches-py")
+    data_dir = Path(os.environ.get("PWA_CIFAR_DIR", Path.home() / ".datasets" / "cifar-10-batches-py"))
     if data_dir.exists():
         for bf in sorted(data_dir.glob("data_batch_*"))[:3]:
             data_hashes[bf.name] = _h.md5(bf.read_bytes()).hexdigest()

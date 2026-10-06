@@ -13,6 +13,7 @@ from __future__ import annotations
 import ast
 import json
 import sys
+import os
 from pathlib import Path
 
 import numpy as np
@@ -75,7 +76,7 @@ def _train_check(paper_dir: Path, epochs: int = 3, inject_no_norm: bool = False)
         tc.CIFAR_NORM = T.Lambda(lambda x: x)
     try:
         dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        d = tc.CifarData(Path(r"F:\deepseek\.datasets"), 1000, dev)
+        d = tc.CifarData(Path(os.environ.get("PWA_DATASETS_ROOT", Path.home() / ".datasets")), 1000, dev)
         loader = d.tst_loader(128)
         results = {}
         for mode in ["base", "ours", "no_ts", "no_ent"]:

@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+import os
 from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parent
@@ -107,7 +108,8 @@ def main() -> int:
     def c5():
         demo = args.demo
         if not demo:
-            for cand in (SKILL / "demo-tmlr-paper", Path(r"F:\deepseek\demo-tmlr-paper")):
+            _legacy = os.environ.get("PWA_DEMO_PAPER")
+            for cand in (SKILL / "demo-tmlr-paper", Path(_legacy) if _legacy else Path("demo-tmlr-paper")):
                 if cand.exists():
                     demo = str(cand)
                     break

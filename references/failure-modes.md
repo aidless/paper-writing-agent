@@ -47,8 +47,8 @@
 | FM-27 | 引文有效性缺失与"虚报完成"（FM-19 的第三、四层） |
 | FM-28 | 验证脚手架污染交付态（工具免疫而非流程纪律） |
 | FM-29 | 真实实验可复现性缺失（训练配置不是证据） |
-| FM-30 | 扫描器把章节号/格式差异当作数值 mismatch（dogfood mm-epc 发现） |
-| FM-31 | 假想值被当作实测漂移（dogfood 2：AGI-KIT） |
+| FM-30 | 扫描器把章节号/格式差异当作数值 mismatch（dogfood 首篇发现） |
+| FM-31 | 假想值被当作实测漂移（dogfood 2：第二个仓） |
 ## FM-1 旧数字残留（种子数更新后）
 - 症状：摘要/贡献区仍写 8 种子结果（41.2-42.6%），正文已更新为 24 种子（33.7-34.9%）。
 - 检测：scan_number_consistency.py --stale 旧值列表 --fail-on-stale。
@@ -238,8 +238,8 @@
 - 实战：R6 审稿 3+ 角色独立用 `--verify` 抓出 manifest 过期；R6 重建后 36/36 全过。
 
 ## FM-25 工具输出不可复现（报告内嵌绝对路径）
-- 症状：扫描/验证脚本的报告内嵌绝对路径（如 `Target: F:\deepseek\demo-tmlr-paper`、
-  `Ledger: F:\deepseek\...\CLAIM_LEDGER.md`），导致"按标准流程重跑六扫"这一动作
+- 症状：扫描/验证脚本的报告内嵌绝对路径（如 `Target: <PROJECT_ROOT>\demo-tmlr-paper`、
+  `Ledger: <PROJECT_ROOT>\...\CLAIM_LEDGER.md`），导致"按标准流程重跑六扫"这一动作
   本身就会改变 reports 字节——即使每次都记得重建 manifest，FM-24 门也会反复
   失效（R6/R8/R9/R10 四次，前几轮只归因于"忘记重建清单"，未触及路径相关性）。
 - 检测：报告头部是否含绝对路径；**从不同 cwd 运行同一扫描，报告哈希是否一致**
@@ -326,14 +326,14 @@
 - 元教训：**训练配置即证据**——模型输出不可复现时，数字再漂亮也不是证据；
   预算约束必须披露而不是隐藏（诚实降级 > 伪造完整）。
 
-## FM-30 扫描器把章节号/格式差异当作数值 mismatch（dogfood mm-epc 发现）
-- 症状：scan_number_consistency 的 Table-vs-prose 段把 `### 3.1 Setup`（章节号）、`{+}0.068` vs `0.068`（正负号呈现）、`1.00` vs `1.0%`（**跨量纲误配对**：PCI 倍数列 ×1.00 vs 百分比 1.0%）判为 mismatch——dogfood mm-epc 5/5 命中全为误报，稿件实无漂移。
-- 检测：mismatch 行上下文若为 `### \d+\.\d+` 标题模式、或两侧数值解析相等（仅符号/小数位差异），归为 format-only；两侧带不同量纲记号（`\times$` vs `%`）则整对作废；复核记录 2026-10-04（mm-epc/paper：初判 2 真实 + 3 误报，二次量纲核对后 5/5 全误报——**初判也会错，mismatch 必须逐对看量纲**）。
+## FM-30 扫描器把章节号/格式差异当作数值 mismatch（dogfood 首篇发现）
+- 症状：scan_number_consistency 的 Table-vs-prose 段把 `### 3.1 Setup`（章节号）、`{+}0.068` vs `0.068`（正负号呈现）、`1.00` vs `1.0%`（**跨量纲误配对**：PCI 倍数列 ×1.00 vs 百分比 1.0%）判为 mismatch——dogfood 首篇 5/5 命中全为误报，稿件实无漂移。
+- 检测：mismatch 行上下文若为 `### \d+\.\d+` 标题模式、或两侧数值解析相等（仅符号/小数位差异），归为 format-only；两侧带不同量纲记号（`\times$` vs `%`）则整对作废；复核记录 2026-10-04（首篇稿件：初判 2 真实 + 3 误报，二次量纲核对后 5/5 全误报——**初判也会错，mismatch 必须逐对看量纲**）。
 - 修复：读报告先分类 numeric-real vs format-only（数值真漂移才改稿）；格式类统一口径（百分比小数位、Δ 正负号）；长期修复=扫描器加 format-only 分类（equal(parse) 时降级为 INFO）。
 - 元教训：**扫描器的误报率决定它的可信度**——把格式差异报成 mismatch，会让使用者学会忽略整段报告；分类比全报更有价值。
 
-## FM-31 假想值被当作实测漂移（dogfood 2：AGI-KIT）
-- 症状：table-vs-prose 门把 Limitations 段里"未来压力测试将要喂进去的近邻值对"当成测量值配对。AGI-KIT 稿 `preprint_unified_en.md:728` 写作 `feed the gate near-tied candidates ... (0.8499999 vs 0.8500001)`，表格阈值列有 `0.85`，于是被判 drift——实际数字在句中的角色是**待检验的示例**，不是已测量的值。
+## FM-31 假想值被当作实测漂移（dogfood 2：第二个仓）
+- 症状：table-vs-prose 门把 Limitations 段里"未来压力测试将要喂进去的近邻值对"当成测量值配对。该仓稿件 `preprint_unified_en.md:728` 写作 `feed the gate near-tied candidates ... (0.8499999 vs 0.8500001)`，表格阈值列有 `0.85`，于是被判 drift——实际数字在句中的角色是**待检验的示例**，不是已测量的值。
 - 检测：段落内出现前瞻性措辞（future / follow-up(s) / planned / will / would / to be / prospective / limitation / future work）时，该段内的近邻配对属于假想语境。夹具 `hypothetical-false-positive` 锁定（期望 0 mismatch / 2 downgrades）。
-- 修复：`HYPOTHETICAL_RE` 命中段落时降级为 `hypothetical`，与其他降级一样进 `Format/dimension downgrades` 段并附理由。实现注记：`follow-?up\b` 匹配不到 "follow-ups"（`s` 紧跟使词边界失败）——AGI-KIT 原文正是 "Two follow-ups remain"，规则写完必须用真实稿复验。
-- 元教训：**语用角色是与量纲正交的一维**。前四类（dimension/format/structural/hypothetical）都在问"这两个数字是什么"，这一类问"它们在这个句子里扮演什么角色"。换稿件域就是新的误报来源——mm-epc 挖出前三类，AGI-KIT 挖出第四类。
+- 修复：`HYPOTHETICAL_RE` 命中段落时降级为 `hypothetical`，与其他降级一样进 `Format/dimension downgrades` 段并附理由。实现注记：`follow-?up\b` 匹配不到 "follow-ups"（`s` 紧跟使词边界失败）——该稿原文正是 "Two follow-ups remain"，规则写完必须用真实稿复验。
+- 元教训：**语用角色是与量纲正交的一维**。前四类（dimension/format/structural/hypothetical）都在问"这两个数字是什么"，这一类问"它们在这个句子里扮演什么角色"。换稿件域就是新的误报来源——dogfood 首篇挖出前三类，第二篇挖出第四类。

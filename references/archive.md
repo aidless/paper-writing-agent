@@ -44,7 +44,7 @@ ARCHIVE/
 
 - **ARCHIVE 是跨论文资产，不进单论文的 evidence_manifest.json**
 - 单论文 manifest 只含该论文的证据（results/paper/scripts）
-- ARCHIVE 在 `F:\deepseek\ARCHIVE\`（项目级，跨 demo 论文）
+- ARCHIVE 在 `<PROJECT_ROOT>\ARCHIVE\`（项目级，跨 demo 论文）
 
 ## 与 FINDINGS / FM 的关系
 

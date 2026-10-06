@@ -4,7 +4,7 @@ name: mutation-control
 # 目的不是抓 bug, 而是抓"假绿门"——CI 里 `|| true` / `|| echo` / 删检查让门变安静。
 #
 # 真门 = ci.yml:54-55 "Selftests (C3)" 用的同一个命令:
-#     python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10
+#     python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10,C11,C12,C13
 # run_ci.py 在任何一项 FAIL 时返回 1 (run_ci.py:216-219)。
 # 这覆盖了 ci.yml 里 C1/C3/C4/C6/C7/C8/C9/C10 全部判据 (ci.yml:40-73)。
 #
@@ -56,7 +56,7 @@ jobs:
         run: |
           set -euo pipefail
           set +e
-          python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10
+          python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10,C11,C12,C13
           rc=$?
           set -e
           echo "baseline exit=$rc"
@@ -103,7 +103,7 @@ jobs:
           find . -type f -name '*.py[co]' -delete 2>/dev/null || true
 
           set +e
-          python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10
+          python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10,C11,C12,C13
           rc=$?
           set -e
           echo "mutated exit=$rc"
@@ -159,7 +159,7 @@ jobs:
           fi
 
           set +e
-          python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10
+          python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10,C11,C12,C13
           rc=$?
           set -e
           if [ "$rc" -ne 0 ]; then

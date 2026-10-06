@@ -20,9 +20,10 @@ import argparse
 import json
 import sys
 from datetime import datetime, timezone
+import os
 from pathlib import Path
 
-PROJECTS_ROOT = Path(r"F:\deepseek\papers") if Path(r"F:\deepseek\papers").exists() else Path("papers")
+PROJECTS_ROOT = Path(os.environ["PWA_PROJECTS_ROOT"]) if os.environ.get("PWA_PROJECTS_ROOT") else Path("papers")
 STATE = PROJECTS_ROOT / ".active_project.json"
 
 

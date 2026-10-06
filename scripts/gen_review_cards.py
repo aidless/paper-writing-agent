@@ -13,9 +13,13 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
+import os
 from pathlib import Path
 
-DESCRIBE = Path(r"C:\Users\Administrator\.agents\skills\deepseek-eyes\scripts\describe_image.py")
+DESCRIBE = Path(os.environ.get(
+    "PWA_DESCRIBE_SCRIPT",
+    Path.home() / ".agents" / "skills" / "deepseek-eyes" / "scripts" / "describe_image.py",
+))
 
 
 def pdf_pages(pdf: Path) -> int:

@@ -212,7 +212,7 @@ return {
 
 ## 成本自适应审稿（Cost-Adaptive Review，L3-3）
 
-> 决策证据：演化账本 G003（`F:\deepseek\.agent-memory\evolution\EVOLUTION_LEDGER.md`，
+> 决策证据：演化账本 G003（`<PROJECT_ROOT>\.agent-memory\evolution\EVOLUTION_LEDGER.md`，
 > 2026-08-15，统计门，真实模型数据）。equal-budget A/B（4 样稿/5 缺陷，双臂各
 > 32 调用，calls 比 1.0，真实 LLM deepseek-v4-flash）：8 角色 multi-role 与
 > 单审稿人双臂均检全 5 缺陷、配对全平（b=0/c=0，exact McNemar p=1.0000），

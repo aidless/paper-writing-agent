@@ -1,17 +1,17 @@
-# Dogfood · 第二次：用本包审计 AGI-KIT（2026-10-04）
+# Dogfood · 第二次：用本包审计另一个仓（2026-10-04）
 
-> 第一次 dogfood 见 [mm-epc 报告](2026-10-04-mm-epc-scan.md)（产出 FM-30）。本次目标：换一个完全不同的稿件域（英文长稿 + 多版本目录 + 已有 review 归档）再看一次门的表现。
-> 对象：`aidless/AGI-KIT`（Python，96MB，pushed 2026-08-15），`papers/` 含 `preprint_unified_en.md`（1624 行）、`COVER_LETTER.md`、`tmlr/`、`reviews/`、`_deprecated/`（5 篇旧稿归档）。
+> 第一次 dogfood 见 [首篇报告](2026-10-04-dogfood-1-under-review.md)（产出 FM-30）。本次目标：换一个完全不同的稿件域（英文长稿 + 多版本目录 + 已有 review 归档）再看一次门的表现。
+> 对象：另一个已公开的研究仓（Python，约 96MB），`papers/` 含 `preprint_unified_en.md`（1624 行）、`COVER_LETTER.md`、`tmlr/`、`reviews/`、`_deprecated/`（5 篇旧稿归档）。
 
 ## 跑法
 
 ```bash
-python3 scripts/scan_number_consistency.py <AGI-KIT>/papers
+python3 scripts/scan_number_consistency.py <REPO>/papers
 ```
 
 ## 发现 A：第四类误报——假想值（→ 新规则 hypothetical）
 
-v1.2.0 的 FM-30 修复（dimension / format / structural）在 AGI-KIT 上把 2 条命中中的 1 条正确降级，另一条**未捕获**：
+v1.2.0 的 FM-30 修复（dimension / format / structural）在该仓上把 2 条命中中的 1 条正确降级，另一条**未捕获**：
 
 ```
 - table `0.85` vs prose `0.8499999` @ preprint_unified_en.md:728
@@ -26,9 +26,9 @@ v1.2.0 的 FM-30 修复（dimension / format / structural）在 AGI-KIT 上把 2
 
 这是与前三类正交的第四类：**语用角色**——数字在句中的角色是"待检验的示例"还是"已测量的值"。修法：新增 `HYPOTHETICAL_RE`（future / follow-up(s) / planned / will / would / to be / prospective / limitation），命中段落内的近邻配对降级为 `hypothetical` 并照常列出。
 
-> 实现注记：`follow-?up\b` 匹配不到 "follow-ups"（`s` 紧跟使词边界失败）。AGI-KIT 稿件原文正是 "Two follow-ups remain"——第一次写规则时漏了，写完立即用真实稿复验才发现。
+> 实现注记：`follow-?up\b` 匹配不到 "follow-ups"（`s` 紧跟使词边界失败）。该稿件原文正是 "Two follow-ups remain"——第一次写规则时漏了，写完立即用真实稿复验才发现。
 
-修后复扫 AGI-KIT：**0 mismatch / 19 downgrades**；mm-epc 不回归（0 / 5）；真漂移夹具仍报出 1 条。
+修后复扫该仓：**0 mismatch / 19 downgrades**；首篇稿件不回归（0 / 5）；真漂移夹具仍报出 1 条。
 
 ## 发现 B：双语库静默分叉（→ fm_index 双语化 + 计数门）
 
@@ -43,7 +43,7 @@ v1.2.0 的 FM-30 修复（dimension / format / structural）在 AGI-KIT 上把 2
 
 ## 发现 C：稿件自带的诚实声明（本包未覆盖，但值得记录）
 
-AGI-KIT 的 README 与稿件顶部已经自带 pwa 哲学的雏形——"earlier conclusions deprecated by newer analyses"、"do not reuse the superseded `p<0.01` claims"、"the two samples are not directly comparable"。这类**自我作废声明**目前不在本包任何门的覆盖范围内；它靠人工写、靠人守。本包的 stale-marker 门只能查"旧数字是否还在文本里"，查不了"作者有没有写下作废声明"。
+该仓的 README 与稿件顶部已经自带 pwa 哲学的雏形——"earlier conclusions deprecated by newer analyses"、"do not reuse the superseded `p<0.01` claims"、"the two samples are not directly comparable"。这类**自我作废声明**目前不在本包任何门的覆盖范围内；它靠人工写、靠人守。本包的 stale-marker 门只能查"旧数字是否还在文本里"，查不了"作者有没有写下作废声明"。
 
 → 记入 §遗留（不实现，等有第二个真实用例再动）。
 

@@ -66,4 +66,4 @@
 - Claim Map 的"最低证据" → CLAIM_LEDGER 验证方法列（已验证/阻塞状态）
 - Run Order 的 Decision Gate → gates_config.json 的验收门
 - Failure Interpretation → HYPOTHESES.md 的"若不成立则如何"（预注册）
-- 本模板 → `F:\deepseek\demo-tmlr-paper\evidence\EXPERIMENT_PLAN.md`（Phase A 实际应用）
+- 本模板 → `<PROJECT_ROOT>\demo-tmlr-paper\evidence\EXPERIMENT_PLAN.md`（Phase A 实际应用）

@@ -44,7 +44,7 @@
 
 ## 3b. AAAI 专节（L3-2 增补，2026-10 快照）
 
-> 动机：mm-epc 线的投稿目标即 AAAI；本节为 AAAI 做与 §3 等价的维度映射。
+> 动机：本包作者的一条实际投稿线目标为 AAAI；本节为 AAAI 做与 §3 等价的维度映射。
 > ⚠ §7 快照警示同样适用：AAAI 各年度 CFP 差异显著（页数、双截止、AI 披露条款），投稿前以当年 aaai.org 官网为准。
 
 ### 3b.1 维度差异（TMLR 基线 → AAAI）
@@ -79,7 +79,7 @@
 
 1. §5 第 1 步同款参数化；G1 按 3b.2 改为内容检查而非选项检查。
 2. Author Kit 不入 `templates/`（许可限制）；本表只记录官方入口，投稿时人工置入。
-3. mm-epc 现货：仓内已有 `aaai_student_abstract/`（Student Abstract 赛道产物），复用本表核对页数与匿名。
+3. 该投稿线的仓内已有 `aaai_student_abstract/`（Student Abstract 赛道产物），复用本表核对页数与匿名。
 
 
 ## 4. G 级可复用性矩阵（check_tmlr_compliance.py 的检查 × venue）

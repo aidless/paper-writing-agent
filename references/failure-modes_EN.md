@@ -59,7 +59,7 @@ New entries must satisfy all of the following, otherwise the index generator
 | FM-28 | Verification scaffolding pollutes the delivery state (tool immunity, not process discipline) |
 | FM-29 | Real experiment reproducibility missing (training config is not evidence) |
 | FM-30 | Scanner flags heading numbers, dimension changes and hypothetical values as drift |
-| FM-31 | A hypothetical value read as measured drift (dogfood 2: AGI-KIT) |
+| FM-31 | A hypothetical value read as measured drift (dogfood 2: second repo) |
 ## FM-1 Stale number residue (after a seed-count update)
 - Symptoms: the Abstract/contributions section still reports the 8-seed results (41.2-42.6%), while the body has been updated to the 24-seed results (33.7-34.9%).
 - Detection: `scan_number_consistency.py --stale` old-value list `--fail-on-stale`.
@@ -247,8 +247,8 @@ reviewers independently recomputed/recompiled and verified with scipy/arXiv API/
 - Field report: 3+ roles at R6 independently caught the stale manifest with `--verify`; after the R6 rebuild, 36/36 all passed.
 
 ## FM-25 Tool output not reproducible (absolute paths embedded in reports)
-- Symptoms: scan/validation scripts embed absolute paths in their reports (e.g., `Target: F:\deepseek\demo-tmlr-paper`,
-  `Ledger: F:\deepseek\...\CLAIM_LEDGER.md`), so the very act of "rerunning the six scans per the standard procedure"
+- Symptoms: scan/validation scripts embed absolute paths in their reports (e.g., `Target: <PROJECT_ROOT>\demo-tmlr-paper`,
+  `Ledger: <PROJECT_ROOT>\...\CLAIM_LEDGER.md`), so the very act of "rerunning the six scans per the standard procedure"
   changes the report bytes — even with the manifest rebuilt every time, the FM-24 gate keeps failing
   (R6/R8/R9/R10 four times; earlier rounds only blamed "forgot to rebuild the manifest" without reaching the path dependence).
 - Detection: does the report header contain absolute paths? **Run the same scan from different cwds — are the report hashes identical?**
@@ -341,8 +341,8 @@ reviewers independently recomputed/recompiled and verified with scipy/arXiv API/
   unsigned `0.068` of the same signed value, (c) `Section 3.1` / `### 3.1`
   heading numbers, and (d) a near-tied pair quoted as the INPUT of a planned
   stress test (`(0.8499999 vs 0.8500001)` in a Limitations paragraph).
-  Dogfood 1 (mm-epc) reported 5 of which 5 were false positives; dogfood 2
-  (AGI-KIT) found class (d).
+  Dogfood 1 reported 5 of which 5 were false positives; dogfood 2
+  (second repo) found class (d).
 - Detection: a downgrade classifier runs before the verdict; downgraded pairs
   are printed in a separate `Format/dimension downgrades (FM-30)` report
   section WITH their reason, so nothing is hidden. Fixtures:
@@ -359,10 +359,10 @@ reviewers independently recomputed/recompiled and verified with scipy/arXiv API/
   the reader learns to skip the report. When a dogfood run shows every hit is
   noise, fix the gate before trusting it on anything.
 
-## FM-31 A hypothetical value read as measured drift (dogfood 2: AGI-KIT)
+## FM-31 A hypothetical value read as measured drift (dogfood 2: second repo)
 - Symptoms: the table-vs-prose gate pairs a near-tied value pair that a
   Limitations paragraph announces as the INPUT of a future stress test, and
-  reports it as drift. AGI-KIT `preprint_unified_en.md:728` writes
+  reports it as drift. That repo's `preprint_unified_en.md:728` writes
   `feed the gate near-tied candidates ... (0.8499999 vs 0.8500001)` while the
   table holds a threshold column with `0.85`. The numbers' discourse role is
   "example to be tested", not "measurement".
@@ -374,9 +374,9 @@ reviewers independently recomputed/recompiled and verified with scipy/arXiv API/
   the `Format/dimension downgrades` section with its reason like the others.
   Implementation note: `follow-?up\b` does not match "follow-ups" (`s`
   follows immediately, so the word boundary fails) — and that is the exact
-  wording in the AGI-KIT source.
+  wording in that repo's source.
 - Meta-lesson: **discourse role is a dimension orthogonal to magnitude.** The
   first three classes (dimension / format / structural) all ask "what are these
   two numbers"; this one asks "what do they do in this sentence". A new paper
-  domain is a new false-positive source: mm-epc produced the first three,
-  AGI-KIT produced the fourth.
+  domain is a new false-positive source: dogfood 1 produced the first three,
+  The second repo produced the fourth.

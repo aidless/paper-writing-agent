@@ -225,7 +225,7 @@ def main() -> int:
     # same quantity written inconsistently. Threshold: |a-b| <= 1e-3 (and
     # relative <= 1e-3 of the larger). Same-literal occurrences are fine.
     #
-    # FM-30 (dogfood 2026-10-04, mm-epc: 5 flagged / 0 real): bare float
+    # FM-30 (dogfood 2026-10-04, first repo: 5 flagged / 0 real): bare float
     # comparison produced three false-positive classes. Each is now excluded
     # from the mismatch verdict BEFORE pairing, so the gate keeps pointing at
     # real drift instead of training the reader to ignore the report.
@@ -257,7 +257,7 @@ def main() -> int:
         r"|(?:Section|Section~|Sec\.|Chapter)\s*~?\s*$"
         r"|^#{1,6}\s+$")
     HEADING_LINE_RE = re.compile(r"^\s*(?:#{1,6}\s+\d|\\(?:sub)*section\*?\{\s*\d)", re.MULTILINE)
-    # Dogfood 2 (AGI-KIT): a number quoted as the subject of a planned or
+    # Dogfood 2 (second repo): a number quoted as the subject of a planned or
     # hypothetical test is not a measurement. The cue is a forward-looking
     # marker in the same paragraph, not a fixed window: "Two follow-ups remain:
     # ... feed the gate near-tied candidates that differ only in low-order bits
@@ -309,7 +309,7 @@ def main() -> int:
                 # ---- FM-30 downgrades (verdict suppressed, still reported) ----
                 # hypothetical: the number is an EXAMPLE of a value under
                 # discussion, not a measurement being reconciled. Dogfood 2
-                # (AGI-KIT, 2026-10-04): a Limitations paragraph writes
+                # (second repo, 2026-10-04): a Limitations paragraph writes
                 # "(0.8499999 vs 0.8500001)" as the near-tied pair a FUTURE
                 # stress test will feed in; pairing that against a table
                 # entry of 0.85 flagged a phantom mismatch.

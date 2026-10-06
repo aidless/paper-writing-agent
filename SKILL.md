@@ -283,7 +283,7 @@ text-only reviewer models.
    Wilcoxon, hold when not significant):
 
 ```
-python F:\deepseek\study_repos\equal-budget-experiment\equal_budget_review.py --dir F:\deepseek\study_repos\equal-budget-experiment
+python <PROJECT_ROOT>\study_repos\equal-budget-experiment\equal_budget_review.py --dir <PROJECT_ROOT>\study_repos\equal-budget-experiment
 ```
 
    Swap the mock `review_fn` for the real LLM reviewer, use ≥20 manuscripts with

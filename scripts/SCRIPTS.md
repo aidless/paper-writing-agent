@@ -17,7 +17,7 @@
 
 - `run_acceptance_gates.py` — 配置驱动验收门,exit 0=全 PASS;`--report` 落报告、`--record` 记历史;每门可标 `"expected_fail": true, "expected_reason": "..."`(设计性阻断 → 打印 FAIL(expected), 不影响退出码, gate_reflection 忽略) | 每轮结束 | `python scripts/run_acceptance_gates.py gates_config.json --report reports/gates.json --record gates_history.jsonl`
 - `gate_reflection.py` — 检测连续 FAIL 门禁并生成反思块(Reflexion;expected_fail 门不计入且重置连击) | 门禁历史≥2 条时 | `python scripts/gate_reflection.py --history gates_history.jsonl --out ROUND_Rn_reflection.md`
-- `scanner_regression.py` — 失败类夹具回归(机器检查不漏检/不误报;四族 number-consistency + stats-consistency + figure-claims + compile-gate;`--fixture`/`--family` 可选;夹具 spec 支持 `skip_when` 环境降级) | 新增失败模式后 | `python scripts/scanner_regression.py`
+- `scanner_regression.py` — 失败类夹具回归(脏夹具必须命中、clean 不得误报;族和例数以 `FAMILIES` 为准,当前 5 族。`skip_when` 环境降级打印 SKIP,摘要里不计入 PASS;`--fail-on-skip` 把 SKIP 当成失败) | 新增失败模式后 | `python scripts/scanner_regression.py`
 - `check_judge_calibration.py` — judge 校准门(FNR/FPR 阈值,ARS 标准;未校准禁止计入终评) | Phase 4.5 O2 打分前 | `python scripts/check_judge_calibration.py <calibration.json> --fail-on-uncalibrated --out reports/calibration.md`
 
 ## 证据与可复现(Phase 0/1/5)
@@ -47,7 +47,7 @@
 ## 交付(Phase 5)
 
 - `check_submit_ready.py` — 投稿就绪检查 | Phase 5 前 | `python scripts/check_submit_ready.py <dir>`
-- `gate_citations.py` — 引用验证门禁(调 research-kit verify_citations.py 4 层验证;断网/超时文档化降级 Skipped_network;无 bib 可用 --allow-missing-bib 放行) | Phase 5 终稿前 | `python scripts/gate_citations.py <dir> --fail-on-suspicious --out reports/citations_gate.md`
+- `gate_citations.py` — 引用验证门禁(外部 verify_citations.py;路径只认 CITATION_VERIFIER_PATH、已设置的 PWA_RESEARCH_KIT、仓库内 tools/citation-verifier/。缺失 exit 2,不是 Manual_needed。Manual_needed 的结论是 MANUAL_REVIEW,退出码仍为 0。断网为 DEGRADED) | Phase 5 终稿前 | `python scripts/gate_citations.py <dir> --fail-on-suspicious --out reports/citations_gate.md`
 - `release.py` — 发布打包 | 交付 | `python scripts/release.py`
 
 ## 测试
@@ -57,3 +57,30 @@
 
 > 维护规则: 新增脚本必须在本表登记(名称/触发/用法一行),否则视为未发布;
 > 删除/改名脚本同步更新本表与 SKILL.md Resources。
+> `tests/test_inventory_drift.py` 会断言 `scripts/*.py` 的每个文件名都出现在本表。
+
+## 索引补齐（与 scripts/*.py 对齐）
+
+上面各节没点到的文件。一行一个名字,用途取自各文件 docstring 首行。
+
+- `scan_hallucination.py` — hallucination scanner (MLR-Bench 四类) | Phase 3 | `python scripts/scan_hallucination.py <dir> --fail-on-error`
+- `scan_answer_fabrication.py` — 答案拟合扫描器 | 改 scripts/ 后 / CI C11 | `python scripts/scan_answer_fabrication.py <dir>`
+- `verify_labels.py` — 标签判定器验证门 | 使用标签匹配器之前 | `python scripts/verify_labels.py <data.jsonl>`
+- `fm_index.py` — 生成并核对 failure-modes 的 INDEX | 改 FM 库后 | `python scripts/fm_index.py --check`
+- `gen_scripts_index.py` — 从 docstring 重建根目录 SCRIPTS.md | 增删脚本后 | `python scripts/gen_scripts_index.py --check`
+- `run_ci.py` — 本地 CI（C1–C13；C5 要 demo 目录，C7 要 scipy） | 改动工具链后 | `python scripts/run_ci.py`
+- `run_experiment_plan.py` — 实验计划编排 | 跑实验计划 | `python scripts/run_experiment_plan.py <plan.json> --dry-run`
+- `suggest_experiments.py` — 由审稿缺口生成实验建议 | 对抗审稿之后 | `python scripts/suggest_experiments.py --review <review.md>`
+- `sweep_coefficients.py` — 系数扫描 | 实验分析 | `python scripts/sweep_coefficients.py --help`
+- `switch_project.py` — 多项目切换 | 并行多个论文目录 | `python scripts/switch_project.py list`
+- `validate_judge_output.py` — judge 输出 schema 校验 | 任何 judge 调用之后 | `python scripts/validate_judge_output.py --schema score --input <f>`
+- `independent_recompute.py` — 从原始数据独立重算 | Phase 3 | `python scripts/independent_recompute.py <paper_dir>`
+- `make_camera_ready.py` — camera-ready 转换 | 录用之后（录用决定不由本仓库做出） | `python scripts/make_camera_ready.py <paper_dir>`
+- `power_analysis.py` — 功效 / 样本量 | 写 Methods 里的 N 之前 | `python scripts/power_analysis.py --selftest`
+- `prepare_submission.py` — 打包投稿材料（上传仍是人工） | Phase 5 | `python scripts/prepare_submission.py <paper_dir>`
+- `rebuttal_sim.py` — rebuttal 模拟 | Phase 5 前 | `python scripts/rebuttal_sim.py --help`
+- `refine_verify.py` — 多种子复核训练配置 | 实验分析 | `python scripts/refine_verify.py --help`
+- `retrieve_experience.py` — 三因子经验检索 | 会话开始 | `python scripts/retrieve_experience.py --task "<goal>"`
+- `draft_rebuttal.py` — 从审稿摘要起 rebuttal 骨架 | 收到审稿后 | `python scripts/draft_rebuttal.py --help`
+- `check_submission_package.py` — 投稿包检查 | 上传前 | `python scripts/check_submission_package.py <paper_dir> --fail-on-error`
+- `stats.py` — exact McNemar / Wilcoxon / Friedman+Nemenyi / CLES | 被其他脚本 import | `python scripts/stats.py --help`

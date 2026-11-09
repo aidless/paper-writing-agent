@@ -1,125 +1,67 @@
-# Paper Writing Agent (English overview)
+# Paper Writing Agent
 
 [![CI](https://github.com/aidless/paper-writing-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/aidless/paper-writing-agent/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
+![Python](https://img.shields.io/badge/CI_matrix-3.11%20%7C%203.12%20%7C%203.13-blue)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green)
+![Regression cases](https://img.shields.io/badge/regression_cases-27-blue)
 
-An **evidence-first scientific paper writing and TMLR-submission agent**:
-turn delivered evidence into a manuscript that clears the
-*Transactions on Machine Learning Research* (TMLR) bar. Every number must be
-independently recomputable from the evidence package; no claim enters the text
-without a ledger entry backed by a file+field.
+<!-- problem-start -->
+Deterministic gates that check a manuscript's numbers, citations, and TMLR submission hygiene against an evidence package.
+This repository does not write a paper and does not accept one; a person drafts, and a venue decides.
+Offline check: `make regression` (no LLM, no TeX). TeX compile gates run in the `tex-gates` CI job; a local SKIP is not a pass.
+<!-- problem-end -->
 
-## Quick start
+**STATUS: WORK-IN-PROGRESS — not A yet.**
 
-```bash
-# 1. Bootstrap a paper project (anonymous TMLR template + claim ledger +
-#    protocol with failure-mode lessons baked in + gates config)
-python scripts/init_paper.py <paper_dir> --title "Your Title" --round-report
+Gaps that keep this short of an A:
 
-# 2. Inventory evidence and hash it (SHA-256)
-python scripts/build_evidence_manifest.py <paper_dir> --out evidence_manifest.json
+- no writing-quality evaluation in this tree: no blinded review, no model-judge study of drafts, and no venue acceptance record. An earlier overview quoted an AIRS-Bench mean score. This repository does not contain the manifest, log, or submission for that number, so the score is not stated here.
+- Content scanners exit 0 on an empty draft. See [FAILURE_MODES.md](FAILURE_MODES.md).
+- Citation `Manual_needed` still exits 0. The report says `MANUAL_REVIEW`, which is not a pass.
+- `scripts/` has 51 Python files. Dirty-fixture regression covers 5 families and 27 cases. The other files are init, stats, retrieval, and CI helpers. They are not each a gate with a counterexample fixture.
+- `make ci` needs scipy for C7 and a demo paper directory for C5. That path is separate from offline `make regression`.
 
-# 3. Register claims BEFORE drafting
-#    edit <paper_dir>/CLAIM_LEDGER.md  (states: draft/verified/inconclusive/blocked)
+The `regression_cases` shield is a static count locked by the drift tests. It is not a live pass signal. There is no PyPI package. The CI badge points at GitHub Actions, which is the live signal. This audit ran the offline regression on Python 3.12.3 and did not re-run 3.11 or 3.13. The workflow matrix declares all three.
 
-# 4. Draft (Methods+Results from computed values; Abstract last)
+<!-- inventory: scripts=51 regression_cases=27 fixture_cases=27 families=5 reference_docs=27 script_lines=10103 drift_tests=14 pytest_collected=0 -->
 
-# 5. Machine checks (12 scanners)
-python scripts/scan_number_consistency.py <paper_dir> --fail-on-stale
-python scripts/scan_stats_consistency.py  <paper_dir> --fail-on-error
-python scripts/scan_hallucination.py      <paper_dir> --fail-on-error   # MLR-Bench 4-type hallucination
-python scripts/verify_claim_ledger.py     <paper_dir>
-python scripts/verify_taint.py            <paper_dir> --fail-on-error
-python scripts/compile_gate.py            <paper_dir>
-python scripts/check_tmlr_compliance.py   <paper_dir> --names "author1,author2"
+## Two check paths
 
-# 6. Adversarial review (8 roles) until one round with no new Critical/Major
-# 7. Submission package + checks (upload stays manual — protected layer)
-python scripts/prepare_submission.py       <paper_dir>
-python scripts/check_submission_package.py <paper_dir> --fail-on-error
-```
+| Command | Needs | What it shows |
+|---|---|---|
+| `make regression` | Python 3 standard library. No TeX, no LLM, no `requirements.txt` | Dirty fixtures must fire and clean fixtures must stay quiet. Without pdflatex, `compile-error` and `multiply-label` are SKIP |
+| `make regression-tex` | pdflatex and bibtex | compile-gate family only, with `--fail-on-skip` |
+| `make drift` | stdlib unittest | README counts, both hand-written script indexes, empty-draft exit codes, citation-gate degrade |
+| `make ci` | `pip install -r requirements.txt` (includes scipy); C5 also needs a demo paper directory | `scripts/run_ci.py` checks C1–C13. Not the offline regression |
 
-## Architecture
+GitHub Actions splits the same way: `offline-regression` (no TeX, no scientific stack), `tex-gates` (TeX only, `--fail-on-skip`), and `verify` (full requirements, TeX, and `run_ci.py`).
 
-```
-Phase 0  Intake          — experience retrieval (3-factor), project switch, literature review
-Phase 1  Claim ledger    — every claim → evidence file+field; inconclusive outlet for weak claims
-Phase 2  Draft           — power analysis before any N; writing provenance per section
-Phase 3  Machine checks  — 12 scanners (numbers/stats/hallucination/figures/taint/compile/
-                           style/TMLR/ledger/labels/freshness/citations)
-Phase 4  Revision loop   — ROUND_Rn + acceptance gates stay green
-Phase 4.5 Adversarial review — 8 roles (methodology/statistics/experiments/novelty/
-                           reproducibility/writing/ethics/figures), dual-axis verification,
-                           no-code ablation, rebuttal simulation, staged review for long papers
-Phase 5  Submission      — TMLR G1-G11 compliance, citation gate, hash reconciliation,
-                           submission package + mechanical checks (upload manual)
-```
+## Counts locked to the tree
 
-## Key scripts (48 total; ~34 copied into each paper project)
+- 51 files in `scripts/*.py`. The generated [SCRIPTS.md](SCRIPTS.md) must name each of them. `scripts/SCRIPTS.md` and `scripts/SCRIPTS_EN.md` must name each of them too.
+- 27 fixture directories directly under the five families in `assets/scanner_fixtures/`, each registered in `scanner_regression.FAMILIES`. `figure-claims/clean/clean/` is a nested copy inside the clean fixture, not case 28.
+- 27 markdown files in `references/`, including English twins. That is not 27 independent methods.
+- Older wording that counted 49 gates and 29 dirty fixtures, and that printed the regression as a frozen pass fraction, does not match the tree. The inventory comment and the `make regression` summary are the counts to trust.
 
-**Scanners / checks** — `scan_number_consistency` (stale markers, inverted CIs,
-table-vs-prose), `scan_stats_consistency` (recomputes p vs t/z/chi2/F with
-stdlib CDFs, effect-size ranges, n conflicts, MCP risk), `scan_hallucination`
-(MLR-Bench four types: nonexistent citations / hallucinated methodology /
-mathematical errors / faked results), `scan_figure_claims`, `verify_taint`
-(evidence pollution state machine), `compile_gate` (pdflatex + log scan),
-`check_tmlr_compliance` (G1/G3/G4/G6/G7 + dataset-license & compute
-declarations), `verify_claim_ledger` (file/field/value traceability;
-inconclusive = WARN), `verify_labels` (label-matcher validation gate),
-`check_literature_freshness` (+novelty-drift detection), `gate_citations`
-(4-layer arXiv verification).
+`make drift` is `python3 -m unittest tests.test_inventory_drift`. pytest is not a dependency (`pytest_collected=0`).
 
-**Stats / analysis** — `stats.py` (exact McNemar, Wilcoxon+CLES,
-Friedman+Nemenyi with CD plot, bootstrap CI, Breslow-Day heterogeneity,
-forest plot), `power_analysis.py` (paired/two-sample t, exact McNemar,
-proportion, correlation; solve n / power / min-detectable effect; validated
-against Cohen 1988), `independent_recompute.py`.
+## Citation verifier path
 
-**Generation / build** — `init_paper.py` (one-command bootstrap),
-`prepare_submission.py` (zip + OpenReview checklist + G3 anonym re-scan),
-`check_submission_package.py` (C1-C7), `draft_rebuttal.py` (per-comment
-skeleton), `make_camera_ready.py` ([accepted] + author block), `release.py`,
-`seal_run.py`.
+`gate_citations.py` resolves `verify_citations.py` in this order:
 
-**Execution / orchestration** — `run_experiment_plan.py` (declarative plan →
-resource pre-check → scheduling → artifact verification → resume),
-`switch_project.py` (multi-project isolation), `suggest_experiments.py`
-(review/ledger gaps → experiment-completion plans), `run_ci.py` (10-check
-local CI), `scanner_regression.py` (25 fixtures / 12 families),
-`validate_judge_output.py` (judge JSON schema + tolerant parsing),
-`retrieve_experience.py` (3-factor lesson retrieval).
+1. `CITATION_VERIFIER_PATH`
+2. `PWA_RESEARCH_KIT` only when that variable is set (no default under the home directory)
+3. `tools/citation-verifier/verify_citations.py` inside this repo
 
-## Statistical correctness (independently verified)
+If none of those files exist, the process exits 2 and says this is not a PASS and not `Manual_needed`. The tool is not vendored here.
 
-- Wilcoxon / exact McNemar: bit-identical to `scipy` (incl. zero-drop path)
-- Power analysis: matches Cohen 1988 tables (paired n=34 @ d=0.5/p=0.8;
-  two-sample power 0.478 @ n=30/d=0.5; r_min 0.431 @ n=40)
-- Bootstrap CI: deterministic under `seed=300`
-- Everything recomputable from raw per-seed data (`independent_recompute.py`)
+## Docs
 
-## External benchmark: AIRS-Bench evaluation (E139-E144)
+- [SKILL.md](SKILL.md) — orchestration prompt for a writing agent. The prompt may ask a model to draft. The scripts do not draft.
+- [FAILURE_MODES.md](FAILURE_MODES.md) — empty-draft passes, `Manual_needed`, TeX gates skipped locally
+- [README.md](README.md) — Chinese overview
+- [references/failure-modes.md](references/failure-modes.md) — manuscript-revision lessons. That library is not this file.
 
-The agent was evaluated on **AIRS-Bench** (Meta; 20 ML research tasks, pure
-metric scoring vs SOTA, no LLM judge):
+## License
 
-- Pipeline: task description + data samples → LLM writes predictor code →
-  local execution → official `evaluate.py` scoring
-- **12/13 tasks scored, mean normalized score (NS) = 0.3785**
-  (official leaderboard reference: gpt-oss-120b Greedy NS≈0.40 — single-shot
-  deepseek-v4-flash, no retries/multi-candidate)
-- All scores independently recomputable (submission.csv + evaluate.py,
-  SHA-256 manifest); failures honestly classified (env-dependency vs agent)
-- Tools: external `airs-eval` toolkit (6 scripts; path configurable, not bundled)
-
-## Documentation languages
-
-Core docs are Chinese-first; this README and the CI guide are English.
-See `SCRIPTS.md` for the full script index (Chinese) and `references/`
-for methodology docs (Chinese).
-
-## License & attribution
-
-The skill bundles the official TMLR style (`templates/tmlr/`, from the
-JmlrOrg/tmlr-style-file repo). AIRS-Bench evaluation data is CC BY-NC 4.0
-(non-commercial).
+Apache-2.0. `templates/tmlr/` keeps the JmlrOrg template's Apache-2.0 license.

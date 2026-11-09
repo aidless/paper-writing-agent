@@ -8,8 +8,9 @@ Phase 3 机器检查之一(名字引用: compile-gate; 不数序号)。三层设
 2. 动态编译(需 pdflatex+bibtex, 权威层): 在临时目录编译(绝不污染交付态, FM-28),
    日志扫描: 编译错误 / undefined reference / undefined citation / multiply-defined label /
    overfull hbox(WARN)。undefined 判定以编译日志为准(LaTeX 自己报)。
-3. 降级: TeX 不可用 → 只跑静态层, 报告 "## Compile skipped: 1"(文档化降级,
-   与 gate_citations 的 Skipped_network 同哲学——降级是记录的通过, 不静默阻塞)。
+3. 降级: TeX 不可用 → 只跑静态层, 报告 "## Compile skipped: 1",
+   门禁词为 STATIC_ONLY 而不是 PASS。静态层没有错误时退出码仍是 0,
+   这样离线回归可以跑完; scanner_regression 把带 skip_when 的夹具记为 SKIP, 不记为 PASS。
 
 用法:
   python compile_gate.py <paper_dir> --out reports/compile.md
@@ -228,8 +229,16 @@ def render(static: dict, dynamic: dict | None, skipped: bool, fail_on_warning: b
         lines.append("- TeX 不可用, 以静态键核对为准(文档化降级)")
     err = len(compile_errors) + len(undef_refs) + len(undef_cites) + len(multiply)
     warn = overfull + len(orphan) + len(uncited)
-    gate = "PASS" if (err == 0 and (not fail_on_warning or warn == 0)) else "FAIL"
+    static_clean = err == 0 and (not fail_on_warning or warn == 0)
+    if not static_clean:
+        gate = "FAIL"
+    elif skipped:
+        # Static key check only. Do not print PASS: pdflatex did not run.
+        gate = "STATIC_ONLY"
+    else:
+        gate = "PASS"
     lines += ["", f"- 门禁: **{gate}** (错误类 {err}; 警告类 {warn}"
+              + ("; TeX 未运行, 不是编译通过" if gate == "STATIC_ONLY" else "")
               + ("; --fail-on-warning 生效" if fail_on_warning else "") + ")"]
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines), encoding="utf-8")

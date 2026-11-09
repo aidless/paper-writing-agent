@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- README problem statement is three lines: deterministic manuscript-honesty gates. The scripts do not write a paper and do not accept one. Status stays **WORK-IN-PROGRESS — not A yet** because this tree has no writing-quality evaluation.
+- Counts now follow the tree: 51 `scripts/*.py`, 27 regression cases in 5 families, 27 reference markdown files. The old "49 gates / 29 dirty fixtures / 25/25" wording does not match those files. `tests/test_inventory_drift.py` locks the inventory comment.
+- `scanner_regression.py` prints `PASS, SKIP, FAIL` separately. SKIP is not a pass. `--fail-on-skip` is what the TeX CI job uses. Offline `make regression` still exits 0 when the only gaps are the two compile fixtures that need pdflatex.
+- `compile_gate.py` labels a TeX-less run `STATIC_ONLY` instead of PASS.
+- `gate_citations.py` no longer defaults to `~/research-kit`. A missing verifier exits 2. `Manual_needed` is reported as `MANUAL_REVIEW` and still exits 0 (documented in `FAILURE_MODES.md`).
+- README_EN no longer states an AIRS-Bench score. This repository has no manifest, log, or submission for that figure, so the number is not repeated.
+- CI splits `offline-regression` (no TeX, no scientific requirements) from `tex-gates` and from the existing full `verify` job.
+
 ## v1.3.0 — 2026-10-04
 
 ### Fixed

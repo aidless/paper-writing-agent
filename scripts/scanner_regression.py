@@ -213,6 +213,8 @@ def main() -> int:
     ap.add_argument("--fixture", default="", help="只跑指定夹具(默认全部)")
     ap.add_argument("--family", default="", help="只跑指定族(默认全部)")
     ap.add_argument("--fixtures-root", default=str(FIXTURES_ROOT), help="夹具根目录(候选验收可覆盖)")
+    ap.add_argument("--fail-on-skip", action="store_true",
+                    help="任一夹具因环境降级 SKIP 时 exit 1（装了 TeX 的 CI 用；离线默认允许 SKIP）")
     args = ap.parse_args()
     fixtures_root = Path(args.fixtures_root)
 
@@ -229,14 +231,30 @@ def main() -> int:
             return 1
         names = hits
 
-    failed = []
+    passed, skipped, failed = [], [], []
     for fam_name, fname in names:
         ok, msg = run_fixture(fam_name, fname, fixtures_root)
-        print(f"[{'PASS' if ok else 'FAIL'}] {fam_name}/{fname}: {msg}")
-        if not ok:
-            failed.append(f"{fam_name}/{fname}")
-    print(f"\nscanner regression: {len(names) - len(failed)}/{len(names)} PASS")
-    return 1 if failed else 0
+        label = f"{fam_name}/{fname}"
+        # SKIP is a recorded degrade (for example TeX missing). It is not a pass.
+        if msg.startswith("SKIP"):
+            status = "SKIP"
+            skipped.append(label)
+        elif ok:
+            status = "PASS"
+            passed.append(label)
+        else:
+            status = "FAIL"
+            failed.append(label)
+        print(f"[{status}] {label}: {msg}")
+    print(
+        f"\nscanner regression: {len(passed)} PASS, {len(skipped)} SKIP, "
+        f"{len(failed)} FAIL ({len(names)} cases)"
+    )
+    if failed:
+        return 1
+    if args.fail_on_skip and skipped:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

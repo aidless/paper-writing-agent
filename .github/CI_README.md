@@ -1,52 +1,47 @@
-# Enabling Cloud CI
+# CI layout
 
-The `.github/workflows/ci.yml` file in this skill directory is a ready-to-push
-GitHub Actions workflow. It runs the full local CI suite (10 checks) on every
-push to `main` and on every pull request, across Python 3.11 and 3.12.
+`.github/workflows/ci.yml` runs on every push to `main` and on every pull request.
+The workflow file declares Python 3.11, 3.12, and 3.13 for the full `verify` job.
+The offline and TeX jobs pin 3.12. A badge that lists those versions describes the
+matrix. It is not a claim that this checkout was executed on all three.
 
-## How to enable (3 steps)
+## Jobs
 
-1. Push this directory to any GitHub repository:
-   ```bash
-   git init
-   git add .
-   git commit -m "paper-writing-agent skill"
-   git remote add origin git@github.com:<you>/<repo>.git
-   git push -u origin main
-   ```
-   (The `.github/workflows/ci.yml` must be at the repository root.)
+| Job | Installs | What it runs |
+|---|---|---|
+| `offline-regression` | Python only. No TeX, no `requirements.txt`, no LLM | `scripts/scanner_regression.py` and `python -m unittest tests.test_inventory_drift`. Compile fixtures that need pdflatex print SKIP. SKIP is not a PASS. |
+| `tex-gates` | TeX (`pdflatex` + `bibtex`) only | `scanner_regression.py --family compile-gate --fail-on-skip` |
+| `verify` | `requirements.txt` (includes scipy) and TeX, on 3.11 / 3.12 / 3.13 | `run_ci.py` subset plus a full regression with `--fail-on-skip` |
+| `secret-scan` | gitleaks | full-history secret scan |
 
-2. GitHub Actions runs automatically on push — no extra setup.
+`verify` is the heavy path. It is not the fresh-clone offline regression.
 
-3. Watch the check status on the repo's Actions tab. All 12 steps must pass.
-
-## What CI checks (mirrors `scripts/run_ci.py`)
+## What `run_ci.py` checks
 
 | Check | What it verifies |
 |---|---|
-| C1 | all scripts compile (py_compile) |
+| C1 | all scripts compile (`py_compile`) |
 | C2 | every CLI script's `--help` works |
 | C3 | all declared `--selftest`s pass |
-| C4 | scanner regression 25/25 (12 families) |
-| C6 | power analysis matches Cohen 1988 textbook |
-| C7 | stats library bit-identical to scipy (Wilcoxon/McNemar), bootstrap deterministic |
-| C8 | judge-output validator (valid / invalid / drifted JSON) |
-| C9 | experiment-plan orchestrator dry-run schedule |
-| C10 | experiment-suggestion mapping produces P0 plans |
+| C4 | scanner regression; the summary line separates PASS, SKIP, and FAIL |
+| C5 | evidence protection; needs a demo paper directory, so the workflow does not run it unless that directory exists |
+| C6 | power analysis matches the Cohen 1988 check inside `power_analysis.py --selftest` |
+| C7 | stats library cross-check vs scipy (needs scipy) |
+| C8 | judge-output validator |
+| C9 | experiment-plan dry-run |
+| C10 | experiment-suggestion mapping |
+| C11 | answer-fabrication scan of `scripts/` |
+| C12 | failure-mode index sync (`fm_index.py --check`) |
+| C13 | root `SCRIPTS.md` matches `scripts/*.py` |
 
-## Local equivalent
-
-Before pushing, run the same suite locally:
+## Local equivalents
 
 ```bash
-python scripts/run_ci.py          # all checks
-python scripts/run_ci.py --only C4,C6,C7   # subset
+make regression       # offline, no TeX, no LLM
+make regression-tex   # needs pdflatex; fails if those fixtures SKIP
+make drift            # unittest inventory lock; pytest is not required
+make ci               # run_ci.py; install requirements.txt first for C7
 ```
 
-## Notes
-
-- C5 (evidence protection) needs a demo paper dir; the workflow runs it
-  via the local `--demo` default when a `demo-tmlr-paper` folder exists
-  at the skill root (add one to the repo if you want that check online).
-- Network-dependent checks (`gate_citations`, `literature_freshness`) are
-  intentionally NOT in CI: they degrade to documented passes offline.
+Network-dependent citation checks are not in CI. A missing `verify_citations.py`
+exits 2. That is not a pass. See `FAILURE_MODES.md`.

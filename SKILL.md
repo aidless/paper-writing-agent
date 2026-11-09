@@ -9,6 +9,8 @@ description: "Evidence-first academic paper writing, revision, and TMLR-complian
 
 Author-side writing agent. Turn delivered evidence into a high-quality manuscript that clears the TMLR bar: every claim is supported by accurate, convincing, clear evidence, and at least some of TMLR's audience would care about the findings. Never invent or copy numbers; recompute every statistic from the evidence package.
 
+The Python entry points do not write the manuscript and do not accept it. They check numbers, citations, and submission hygiene. A model that drafts text sits outside these gates, and a venue decides acceptance. Empty drafts can still exit 0 on several scanners; see `FAILURE_MODES.md`.
+
 ## Research cycle (full scientific cycle)
 
 This skill is the writing core of the full research cycle; it also carries the

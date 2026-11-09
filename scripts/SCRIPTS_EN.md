@@ -40,8 +40,12 @@
 - `check_literature_freshness.py` — literature-freshness gate (max-age;
   `--check-drift` flags novelty claims stale vs review coverage) | Phase 5 |
   `python scripts/check_literature_freshness.py <dir> --claims-file novelty_claims.txt --check-drift --fail-on-stale`
-- `gate_citations.py` — citation-verification gate (4-layer arXiv check;
-  network outage degrades to documented pass) | Phase 5 |
+- `gate_citations.py` — citation-verification gate. Resolver order is
+  `CITATION_VERIFIER_PATH`, then `PWA_RESEARCH_KIT` only if set, then
+  `tools/citation-verifier/verify_citations.py`. A missing verifier is exit 2
+  (not Manual_needed, not a pass). `Manual_needed` is reported as
+  `MANUAL_REVIEW` and still exits 0. Network loss is `DEGRADED`, which means
+  the citations were not re-checked. | Phase 5 |
   `python scripts/gate_citations.py <dir> --fail-on-suspicious --out reports/citations_gate.md`
 
 ## Gates & reflection (Phase 4)
@@ -52,9 +56,10 @@
 - `gate_reflection.py` — detects consecutive gate FAILs and generates a
   reflection block (Reflexion) | when gate history >= N entries |
   `python scripts/gate_reflection.py --history gates_history.jsonl`
-- `scanner_regression.py` — failure-class fixture regression (25 fixtures /
-  12 families; `--fixture`/`--family` selectable; `skip_when` env degradation) |
-  after adding a failure pattern | `python scripts/scanner_regression.py`
+- `scanner_regression.py` — failure-class fixture regression (family and case
+  counts come from `FAMILIES`; a `skip_when` degrade prints SKIP and is not a
+  PASS; `--fail-on-skip` fails the run) | after adding a failure pattern |
+  `python scripts/scanner_regression.py`
 - `check_judge_calibration.py` — judge-calibration gate (FNR/FPR vs ARS
   thresholds; uncalibrated scores excluded from final assessment) | Phase 4.5 |
   `python scripts/check_judge_calibration.py <calibration.json> --fail-on-uncalibrated`
@@ -118,8 +123,8 @@
 - `suggest_experiments.py` — experiment-suggestion generator (review
   Critical/Major + ledger inconclusive gaps → P0/P1 completion plans) |
   after adversarial review | `python scripts/suggest_experiments.py --review REVIEW_R1_summary.md`
-- `run_ci.py` — local CI (10 checks: compile/help/selftest/regression/
-  evidence-protection/power/stats-vs-scipy/judge-validator/plan/suggest) |
+- `run_ci.py` — local CI (C1–C13; C5 needs a demo paper directory; C7 needs
+  scipy). This is not the offline `make regression` path. |
   any change | `python scripts/run_ci.py`
 - `retrieve_experience.py` — 3-factor lesson retrieval (recency × importance
   × relevance; verified/active only) | session start |
@@ -133,3 +138,15 @@
   evidence-synthesis adjudication / arXiv discovery
 - `verify_tree_diff.py` / `test_evidence_protection.py` / `test_pyramid.py` —
   evidence-tree protection & integration tests (do not mutate evidence)
+- `scan_answer_fabrication.py` — answer-fitting pattern scan | CI C11 |
+  `python scripts/scan_answer_fabrication.py <dir>`
+- `fm_index.py` — rebuild and check the failure-mode INDEX |
+  `python scripts/fm_index.py --check`
+- `gen_scripts_index.py` — rebuild the root `SCRIPTS.md` from docstrings |
+  `python scripts/gen_scripts_index.py --check`
+- `refine_verify.py` — multi-seed check of train-time configs |
+  `python scripts/refine_verify.py --help`
+- `check_submit_ready.py` — submission-readiness blocker |
+  `python scripts/check_submit_ready.py <dir>`
+- `make_run_record.py` — immutable run record |
+  `python scripts/make_run_record.py --help`

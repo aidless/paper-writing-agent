@@ -9,7 +9,8 @@ Checks (in order, each independently reported):
   C1  py_compile all scripts
   C2  --help smoke on all CLI scripts (except integration-test entry points)
   C3  --selftest on all scripts that declare one
-  C4  scanner_regression (25 fixtures across 12 families)
+  C4  scanner_regression (case count comes from the fixture manifest;
+      SKIP is not counted as PASS — see the summary line)
   C5  test_evidence_protection on a demo paper (evidence protection invariants)
   C6  power_analysis selftest (Cohen textbook cross-check)
   C7  stats library cross-check vs scipy (Wilcoxon / McNemar / bootstrap determinism)

@@ -20,12 +20,15 @@ Phase 5 门禁: 输入 <paper_dir>,自动查找 main.bib / references.bib(也可
   python gate_citations.py <paper_dir> --allow-missing-bib                 # 无 bib 也放行
 
 退出码:
-  0 = 门禁通过;或文档化降级(网络不可达/verifier 超时 -> Skipped_network=1);
-      或无 bib 且 --allow-missing-bib;或报告模式(未给 --fail-on-suspicious)
+  0 = 未发现 Not_found/Mismatch;或文档化降级(网络不可达/verifier 超时 ->
+      Skipped_network=1, 结论 DEGRADED, 不是“引用已验证”);
+      或无 bib 且 --allow-missing-bib;或报告模式(未给 --fail-on-suspicious);
+      或存在 Manual_needed(结论 MANUAL_REVIEW, 退出码仍为 0, 因为本门只拦截
+      Not_found 与 Mismatch —— exit 0 不等于人工已核对)
   1 = 门禁失败: --fail-on-suspicious 且 Not_found+Mismatch > 0;
       或 --fail-on-suspicious 且无 bib(且未 --allow-missing-bib)
   2 = 基础设施错误: paper_dir 不存在 / --bib 指向的文件不存在 / verifier
-      缺失 / verifier 崩溃或输出无法解析
+      缺失(不是 Manual_needed, 也不是 PASS) / verifier 崩溃或输出无法解析
 
 报告段落(固定六段,恒输出,缺省计 0;格式沿用族内约定:
 固定 'paper' 目标标签 + 相对路径 + "## <段落>: <计数>" 行):
@@ -55,13 +58,57 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-_ENV_VERIFIER = os.environ.get("CITATION_VERIFIER_PATH")
-_WIN_LEGACY = Path(os.environ.get("PWA_RESEARCH_KIT", Path.home() / "research-kit")) / "citation-verifier" / "verify_citations.py"
-DEFAULT_VERIFIER = (
-    Path(_ENV_VERIFIER) if _ENV_VERIFIER
-    else _WIN_LEGACY if _WIN_LEGACY.exists()
-    else Path("tools/citation-verifier/verify_citations.py")
-)
+def resolve_default_verifier() -> Path:
+    """Locate verify_citations.py without consulting the user home directory.
+
+    Order: CITATION_VERIFIER_PATH, then PWA_RESEARCH_KIT only when that
+    variable is set, then the in-repo tools/citation-verifier/ path.
+    A missing file is not a pass; main() exits 2.
+    """
+    env = os.environ.get("CITATION_VERIFIER_PATH")
+    if env:
+        return Path(env)
+    kit = os.environ.get("PWA_RESEARCH_KIT")
+    if kit:
+        return Path(kit) / "citation-verifier" / "verify_citations.py"
+    return Path(__file__).resolve().parent.parent / "tools" / "citation-verifier" / "verify_citations.py"
+
+
+def decide_gate(counts: dict, *, degraded: bool, degrade_reason: str,
+                fail_on_suspicious: bool) -> tuple[str, int, str]:
+    """Return (verdict, exit_code, note). MANUAL_REVIEW is exit 0 on purpose."""
+    if degraded:
+        return (
+            "DEGRADED",
+            0,
+            f"文档化降级: {degrade_reason}。引用未在当前会话重新验证"
+            "(计数可能来自 90 天缓存或不可靠),门禁降级为不拦截(exit 0)。"
+            "网络恢复后请重跑本门禁以真正通过。这不是引用已验证。",
+        )
+    suspicious = counts.get("Not_found", 0) + counts.get("Mismatch", 0)
+    manual = counts.get("Manual_needed", 0)
+    if fail_on_suspicious and suspicious > 0:
+        return (
+            "FAIL",
+            1,
+            f"--fail-on-suspicious: Not_found + Mismatch = {suspicious} > 0。",
+        )
+    if suspicious > 0:
+        return (
+            "REPORT",
+            0,
+            f"报告模式(未给 --fail-on-suspicious): Not_found + Mismatch = {suspicious} > 0,"
+            "门禁不拦截。",
+        )
+    if manual > 0:
+        return (
+            "MANUAL_REVIEW",
+            0,
+            f"Manual_needed = {manual}。这些条目没有自动判为通过;"
+            "退出码仍是 0, 因为本门只拦截 Not_found 与 Mismatch。"
+            "人工未核对前不要把 exit 0 当成引用已验证。",
+        )
+    return ("PASS", 0, "未发现拦截类引用(mismatch/not_found), 且 Manual_needed = 0。")
 PROBE_HOSTS = [
     "https://api.crossref.org",
     "https://api.semanticscholar.org",
@@ -225,8 +272,9 @@ def main() -> int:
                     help="Not_found + Mismatch > 0 时 exit 1")
     ap.add_argument("--allow-missing-bib", action="store_true",
                     help="无 bib 文件时 exit 0(默认: 无 bib 且 --fail-on-suspicious 时 exit 1)")
-    ap.add_argument("--verifier", default=str(DEFAULT_VERIFIER),
-                    help=f"verify_citations.py 路径(默认 {DEFAULT_VERIFIER})")
+    ap.add_argument("--verifier", default=None,
+                    help="verify_citations.py 路径(默认: CITATION_VERIFIER_PATH, "
+                         "否则已设置的 PWA_RESEARCH_KIT, 否则仓库内 tools/citation-verifier/)")
     ap.add_argument("--probe-host", action="append", default=None,
                     help="覆盖连通性探测主机(可多次;测试/离线环境用)")
     ap.add_argument("--probe-timeout", type=float, default=5.0,
@@ -277,9 +325,15 @@ def main() -> int:
             _write_out(args.out, report)
         return rc
 
-    verifier = Path(args.verifier).resolve()
+    verifier = Path(args.verifier) if args.verifier else resolve_default_verifier()
     if not verifier.is_file():
-        print(f"错误: verifier 不存在: {verifier}", file=sys.stderr)
+        print(
+            f"错误: verifier 不存在: {verifier}\n"
+            "引用门未运行。这不是 PASS, 也不是 Manual_needed。\n"
+            "设置 CITATION_VERIFIER_PATH, 或将 verify_citations.py 放到 "
+            "tools/citation-verifier/。未设置 PWA_RESEARCH_KIT 时不会读取用户主目录。",
+            file=sys.stderr,
+        )
         return 2
 
     # ---- 网络判定 + 调用 verifier ----
@@ -314,32 +368,16 @@ def main() -> int:
 
     if degraded:
         counts["Skipped_network"] = 1
-        verdict = "DEGRADED(文档化降级)"
-        note = (f"文档化降级: {degrade_reason}。引用未在当前会话重新验证"
-                "(计数可能来自 90 天缓存或不可靠),门禁降级为不拦截(exit 0)。"
-                "网络恢复后请重跑本门禁以真正通过。")
-        rc = 0
-    else:
-        suspicious = counts["Not_found"] + counts["Mismatch"]
-        if args.fail_on_suspicious and suspicious > 0:
-            verdict = "FAIL"
-            rc = 1
-            note = (f"--fail-on-suspicious: Not_found + Mismatch = {suspicious} > 0。"
-                    "以下条目必须修正或删除后重跑: " +
-                    ", ".join(e["key"] for e in per_entry
-                              if e["status"] in ("not_found", "mismatch")))
-        elif suspicious > 0:
-            # 报告模式(未给 --fail-on-suspicious): 有可疑项但不拦截
-            verdict = "REPORT(有可疑项,未拦截)"
-            rc = 0
-            note = (f"报告模式(未给 --fail-on-suspicious): Not_found + Mismatch = {suspicious} > 0,"
-                    "门禁不拦截,但以下条目建议修正或删除: " +
-                    ", ".join(e["key"] for e in per_entry
-                              if e["status"] in ("not_found", "mismatch")))
-        else:
-            verdict = "PASS"
-            rc = 0
-            note = "未发现拦截类引用(mismatch/not_found)。"
+    verdict, rc, note = decide_gate(
+        counts, degraded=degraded, degrade_reason=degrade_reason,
+        fail_on_suspicious=args.fail_on_suspicious,
+    )
+    if verdict == "FAIL":
+        note += " 以下条目必须修正或删除后重跑: " + ", ".join(
+            e["key"] for e in per_entry if e["status"] in ("not_found", "mismatch"))
+    elif verdict == "REPORT":
+        note += " 以下条目建议修正或删除: " + ", ".join(
+            e["key"] for e in per_entry if e["status"] in ("not_found", "mismatch"))
 
     verifier_name = verifier.name
     report = build_report(paper_dir, bib, counts, verdict, note=note,

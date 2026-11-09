@@ -1,8 +1,9 @@
 name: paper-writing-agent CI
 
-# 云端 CI: 把本目录推到任意 GitHub 仓库后, 每次 push/PR 自动跑全量回归。
-# 前置: 仓库根含 scripts/run_ci.py(本地 CI 10 项检查的云端化身)。
-# 触发: push 到 main + 任意 PR。
+# Push to main and every pull request.
+# offline-regression: no TeX, no requirements.txt (the fresh-clone path).
+# tex-gates: TeX only, --fail-on-skip.
+# verify: requirements.txt + TeX + run_ci.py. See .github/CI_README.md.
 
 on:
   push:
@@ -51,16 +52,13 @@ jobs:
             python "$f" --help > /dev/null 2>&1
           done
 
-      - name: Selftests (C3)
-        # C11/C12/C13 were verified green locally and left out of this list. All
-        # three are cheap and they are the ones that catch drift: C11 greps the
-        # scripts for answer-fitting patterns, C12 asserts INDEX.md and the CN/EN
-        # entry lists stay in sync at 31 each, C13 asserts SCRIPTS.md still matches
-        # what is on disk. None of them can fail the build while they are absent.
+      - name: Selftests and non-TeX checks
+        # C4 inside run_ci.py allows SKIP. The next step repeats the regression
+        # with --fail-on-skip because this job has TeX installed.
         run: python scripts/run_ci.py --only C1,C3,C4,C6,C7,C8,C9,C10,C11,C12,C13
 
-      - name: Scanner regression (C4)
-        run: python scripts/scanner_regression.py
+      - name: Scanner regression (C4, TeX installed — SKIP is a failure)
+        run: python scripts/scanner_regression.py --fail-on-skip
 
       - name: Power analysis textbook check (C6)
         run: python scripts/power_analysis.py --selftest
@@ -76,6 +74,46 @@ jobs:
 
       - name: Experiment suggestion mapping (C10)
         run: python scripts/run_ci.py --only C10
+
+  offline-regression:
+    # No TeX and no requirements.txt. This is the fresh-clone path (`make regression`
+    # plus drift tests). Two compile-gate fixtures SKIP here; that is not a pass,
+    # and the summary must say so. The tex-gates job is what fails on SKIP.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Offline scanner regression
+        run: python scripts/scanner_regression.py
+
+      - name: Inventory drift (stdlib unittest, no pytest)
+        run: python -m unittest tests.test_inventory_drift -v
+
+  tex-gates:
+    # TeX-only. Does not install the scientific stack. --fail-on-skip means a
+    # broken TeX install cannot be reported as a green compile-gate run.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install TeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-bibtex-extra
+          pdflatex --version | head -1
+
+      - name: compile-gate fixtures (fail if any SKIP)
+        run: python scripts/scanner_regression.py --family compile-gate --fail-on-skip
 
   secret-scan:
     # Full history: a key leaked in an old commit is still a live key. The CLI is

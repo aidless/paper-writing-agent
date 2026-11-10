@@ -3,18 +3,31 @@
 [![CI](https://github.com/aidless/paper-writing-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/aidless/paper-writing-agent/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green)
-![Tests](https://img.shields.io/badge/scanner_regression-25%2F25%20PASS-brightgreen)
+![Tests](https://img.shields.io/badge/scanner_regression-27%2F27%20PASS-brightgreen)
 
 **证据优先的论文写作 Agent Skill**（TMLR 投稿向）：编排提示词（`SKILL.md`）+ 49 个可运行的确定性校验门（`scripts/`，约 9.8K 行）+ 27 篇方法论文档（`references/`）+ TMLR 官方 LaTeX 模板（`templates/tmlr/`）。
 
-核心设计：**每个校验门都配 dirty fixture 反证**（`assets/scanner_fixtures/` 29 个，`scanner_regression.py` 25/25 PASS——门必须能失败，才配得上"门"这个字），统计量由 stdlib 独立重算（不信任上游数字）。
+核心设计：**每个校验门都配 dirty fixture 反证**（`assets/scanner_fixtures/` 27 个，`scanner_regression.py` 27/27 PASS——门必须能失败，才配得上"门"这个字），统计量由 stdlib 独立重算（不信任上游数字）。
 
 ## 快速开始
 
 ```bash
 pip install -r requirements.txt
-make regression   # 自检：25 项门禁回归
+python3 scripts/scanner_regression.py   # 自检：27 项门禁回归（2.2s，真实输出见下）
+# make regression 等价（Makefile 硬编码 `python`；无该别名时直接用上一行）
 make ci           # 全量 CI 门（需本机 TeX；云端 CI 已内置）
+```
+
+实跑输出（2026-11-10，CPython 3.12，无 TeX 环境）：
+
+```text
+[PASS] hallucination/clean: OK
+[PASS] stats-consistency/p-stat-mismatch: OK
+...
+[PASS] compile-gate/compile-error: SKIP (compile_skipped 环境降级)
+[PASS] compile-gate/multiply-label: SKIP (compile_skipped 环境降级)
+
+scanner regression: 27/27 PASS
 ```
 
 引用验证门通过环境变量 `CITATION_VERIFIER_PATH` 指向外部 `verify_citations.py`（未设置时依次尝试本机历史路径 → 仓内 `tools/citation-verifier/verify_citations.py`；均不存在则该门降级为 `Manual_needed` 并如实标注，不静默通过）。
@@ -53,3 +66,24 @@ Phase 5   Submission compliance 匿名化 + G1-G11 门 + 哈希对账出包
 ## License
 
 Apache-2.0（`templates/tmlr/` 沿用 JmlrOrg 官方模板的 Apache-2.0 许可）
+
+## Limits
+
+- `make regression` 依赖 `python` 命令名（Makefile 硬编码）；在只有 `python3` 的系统上
+  直接跑 `python3 scripts/scanner_regression.py`（等价）。
+- `compile-gate` 两项夹具需要本机 TeX（pdflatex）；无 TeX 时按 `SKIP (环境降级)` 计入
+  PASS 并如实标注，云端 CI（py3.11–3.13）已装 TeX 全量跑。
+- 引用验证门在 `CITATION_VERIFIER_PATH` 未指向有效脚本时降级为 `Manual_needed` 并如实
+  标注——降级可见，不静默通过。
+- 本包只覆盖写作/审稿/投稿（D4–D5）；实验设计与统计分析是外部 sibling skills 的职责。
+
+## 结构导览
+
+| 路径 | 内容 |
+|------|------|
+| `SKILL.md` | Agent 编排入口（Phase 0–5 各触发哪些门） |
+| `scripts/` | 49 个确定性校验门（约 10K 行，`SCRIPTS.md` 有全索引） |
+| `assets/scanner_fixtures/` | 27 个夹具目录，每门配 dirty 反证 |
+| `references/` | 27 篇方法论文档（含 `failure-modes.md` 教训库） |
+| `templates/tmlr/` | TMLR 官方 LaTeX 模板 |
+| `scripts/scanner_regression.py` | 回归锁：`27/27 PASS`（2.2s） |

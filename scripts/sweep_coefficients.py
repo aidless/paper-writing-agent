@@ -17,7 +17,6 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
 
 # grid: T x lam_T x lam_H (8-12 cells). Focus T (biggest effect) and lam_T.
 GRID = [

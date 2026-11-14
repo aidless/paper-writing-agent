@@ -267,7 +267,7 @@ def main() -> int:
     print("\nNext steps (paper-writing-agent phases):")
     print(f"  1. Put experiment outputs under {root / 'results'}")
     print(f"  2. python scripts/build_evidence_manifest.py {root} --out {manifest.name}  (or from {root}: scripts/build_evidence_manifest.py . --out evidence_manifest.json)")
-    print(f"  3. Edit CLAIM_LEDGER.md (Phase 1), draft (Phase 2), then run all machine checks (Phase 3).")
+    print("  3. Edit CLAIM_LEDGER.md (Phase 1), draft (Phase 2), then run all machine checks (Phase 3).")
     return 0
 
 

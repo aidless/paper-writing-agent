@@ -1,0 +1,129 @@
+{
+ "total": 20,
+ "passed": 20,
+ "failed": 0,
+ "selftest": false,
+ "failed_by_axis": {},
+ "results": [
+  {
+   "id": "MC-01",
+   "axis": "stats/mcnemar",
+   "ok": true,
+   "detail": "0.035156"
+  },
+  {
+   "id": "MC-02",
+   "axis": "stats/mcnemar",
+   "ok": true,
+   "detail": "4.266667"
+  },
+  {
+   "id": "RK-01",
+   "axis": "stats/rank",
+   "ok": true,
+   "detail": "3.0"
+  },
+  {
+   "id": "RK-02",
+   "axis": "stats/rank",
+   "ok": true,
+   "detail": "0.15625"
+  },
+  {
+   "id": "RK-03",
+   "axis": "stats/rank",
+   "ok": true,
+   "detail": "4.0"
+  },
+  {
+   "id": "PW-01",
+   "axis": "power/design",
+   "ok": true,
+   "detail": "34.0"
+  },
+  {
+   "id": "PW-02",
+   "axis": "power/design",
+   "ok": true,
+   "detail": "2.3123"
+  },
+  {
+   "id": "LG-01",
+   "axis": "ledger/path",
+   "ok": true,
+   "detail": "per_cell_mean / deepseek-v4-pro|Summ|auth|p0.8 / mean"
+  },
+  {
+   "id": "LG-02",
+   "axis": "ledger/path",
+   "ok": true,
+   "detail": "0.812"
+  },
+  {
+   "id": "SC-01",
+   "axis": "scanner/pvalue",
+   "ok": true,
+   "detail": "0.073388"
+  },
+  {
+   "id": "SC-02",
+   "axis": "scanner/pvalue",
+   "ok": true,
+   "detail": "0.018566"
+  },
+  {
+   "id": "SC-03",
+   "axis": "scanner/pvalue",
+   "ok": true,
+   "detail": "0.095367"
+  },
+  {
+   "id": "NM-01",
+   "axis": "numbers/scan",
+   "ok": true,
+   "detail": "0.7485,0.9123"
+  },
+  {
+   "id": "CG-01",
+   "axis": "compile-gate/static",
+   "ok": true,
+   "detail": "nosuchkey"
+  },
+  {
+   "id": "FX-01",
+   "axis": "fixtures/inventory",
+   "ok": true,
+   "detail": "27"
+  },
+  {
+   "id": "FX-02",
+   "axis": "fixtures/inventory",
+   "ok": true,
+   "detail": "5"
+  },
+  {
+   "id": "MN-01",
+   "axis": "manifest/integrity",
+   "ok": true,
+   "detail": "raised JSONDecodeError"
+  },
+  {
+   "id": "RS-01",
+   "axis": "stats/strata",
+   "ok": true,
+   "detail": "raised TypeError"
+  },
+  {
+   "id": "DC-01",
+   "axis": "docs/evidence-states",
+   "ok": true,
+   "detail": "工程失效结果 ≠ 科学负结果"
+  },
+  {
+   "id": "DC-02",
+   "axis": "docs/phase-map",
+   "ok": true,
+   "detail": "### Phase 4.5 - Adversarial review loop"
+  }
+ ]
+}

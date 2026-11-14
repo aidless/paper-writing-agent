@@ -113,3 +113,30 @@ Apache-2.0（`templates/tmlr/` 沿用 JmlrOrg 官方模板的 Apache-2.0 许可�
 | `references/` | 27 篇方法论文档（含 `failure-modes.md` 教训库） |
 | `templates/tmlr/` | TMLR 官方 LaTeX 模板 |
 | `scripts/scanner_regression.py` | 回归锁：`27/27 PASS`（2.2s） |
+
+## 验收题库与复算
+
+`eval/cases.jsonl` 是 20 条可执行验收题，覆盖 12 个模块/口径（`stats/mcnemar`、
+`stats/rank`、`stats/strata`、`power/design`、`ledger/path`、`scanner/pvalue`、
+`numbers/scan`、`compile-gate/static`、`fixtures/inventory`、`manifest/integrity`、
+`docs/evidence-states`、`docs/phase-map`）。其中 18 条是 `expr`/`raises`，**真调本仓
+`scripts/` 的 API 或真解析仓内数据文件**（夹具 JSON、`scanner_regression.py` 的
+FAMILIES 字面量、27 个夹具目录）；期望值不是抄文档，而是调用模块现算：
+
+```bash
+python3 eval/run_cases.py            # 20/20 cases passed
+python3 eval/run_cases.py --save     # 顺带把结果写进 eval/run-report.json
+python3 eval/run_cases.py --selftest # 篡改一条期望值，必须变红（19/20）
+```
+
+三种 `mode`：`expr`（`verify` 是 Python 代码，执行后读 `result` 与 `expected` 比，
+数值容差 1e-9）、`raises`（断言抛出的异常类名，如 BOM manifest → `JSONDecodeError`、
+把单张 2×2 表传给 `breslow_day` → `TypeError`）、`doc`（`路径::正则`，断言文档里
+写明了某条口径，如证据状态机的「工程失效结果 ≠ 科学负结果」）。
+
+**数字如何复算**：`eval/run-report.json` 里每条 case 都带 `id` / `axis` / `detail`，
+把 `detail` 与 `cases.jsonl` 的 `verify` 代码一起看，就能从源码复现该数字；
+`--save` 重跑一次即可重建整份报告，不需要手工抄数。
+
+**失败归因**：`run_cases.py` 不只报通过率，失败时按 `axis` 汇总（例如
+`stats/mcnemar: 1 条 —— MC-01`），直接指出是哪个模块的哪个口径坏了。
